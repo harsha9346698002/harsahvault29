@@ -282,130 +282,190 @@ input {
 
 
 <script>
+const folders = JSON.parse(localStorage.getItem("folders") || "[]");
+const contacts = JSON.parse(localStorage.getItem("contacts") || "[]");
+const notes = JSON.parse(localStorage.getItem("notes") || "[]");
+
+function saveData() {
+    localStorage.setItem("folders", JSON.stringify(folders));
+    localStorage.setItem("contacts", JSON.stringify(contacts));
+    localStorage.setItem("notes", JSON.stringify(notes));
+}
 
 function openSection(id) {
-
     closeSections();
-
     document.getElementById(id).classList.remove("hidden");
 
+    if (id === "folders") showFolders();
+    if (id === "contacts") showContacts();
+    if (id === "notes") showNotes();
 }
 
 function closeSections() {
-
-    const sections = document.querySelectorAll(".section");
-
-    sections.forEach(section => {
+    document.querySelectorAll(".section").forEach(section => {
         section.classList.add("hidden");
     });
-
 }
 
-
-// FOLDERS
+/* FOLDERS */
 
 function createFolder() {
-
-    const name = document.getElementById("folderName").value;
+    const input = document.getElementById("folderName");
+    const name = input.value.trim();
 
     if (!name) {
         alert("Enter a folder name");
         return;
     }
 
-    const div = document.createElement("div");
+    folders.push(name);
+    saveData();
 
-    div.className = "item";
-
-    div.innerHTML = "📁 " + name;
-
-    document.getElementById("folderList").appendChild(div);
-
-    document.getElementById("folderName").value = "";
-
+    input.value = "";
+    showFolders();
 }
 
+function showFolders() {
+    const list = document.getElementById("folderList");
 
-// FILES
+    list.innerHTML = "";
+
+    folders.forEach((folder, index) => {
+        list.innerHTML += `
+            <div class="item">
+                📁 ${folder}
+                <button onclick="deleteFolder(${index})"
+                style="float:right;background:#dc2626;">
+                Delete
+                </button>
+            </div>
+        `;
+    });
+}
+
+function deleteFolder(index) {
+    folders.splice(index, 1);
+    saveData();
+    showFolders();
+}
+
+/* CONTACTS */
+
+function addContact() {
+    const name = document.getElementById("contactName").value.trim();
+    const number = document.getElementById("contactNumber").value.trim();
+
+    if (!name || !number) {
+        alert("Enter name and phone number");
+        return;
+    }
+
+    contacts.push({
+        name: name,
+        number: number
+    });
+
+    saveData();
+
+    document.getElementById("contactName").value = "";
+    document.getElementById("contactNumber").value = "";
+
+    showContacts();
+}
+
+function showContacts() {
+    const list = document.getElementById("contactList");
+
+    list.innerHTML = "";
+
+    contacts.forEach((contact, index) => {
+        list.innerHTML += `
+            <div class="item">
+                👤 <b>${contact.name}</b>
+                <br>
+                📞 ${contact.number}
+
+                <button onclick="deleteContact(${index})"
+                style="float:right;background:#dc2626;">
+                Delete
+                </button>
+            </div>
+        `;
+    });
+}
+
+function deleteContact(index) {
+    contacts.splice(index, 1);
+    saveData();
+    showContacts();
+}
+
+/* NOTES */
+
+function saveNote() {
+    const text = document.getElementById("noteText").value.trim();
+
+    if (!text) {
+        alert("Write something first");
+        return;
+    }
+
+    notes.push(text);
+
+    saveData();
+
+    document.getElementById("noteText").value = "";
+
+    showNotes();
+}
+
+function showNotes() {
+    const list = document.getElementById("savedNote");
+
+    list.innerHTML = "";
+
+    notes.forEach((note, index) => {
+        list.innerHTML += `
+            <div class="item">
+                📝 ${note}
+
+                <button onclick="deleteNote(${index})"
+                style="float:right;background:#dc2626;">
+                Delete
+                </button>
+            </div>
+        `;
+    });
+}
+
+function deleteNote(index) {
+    notes.splice(index, 1);
+    saveData();
+    showNotes();
+}
+
+/* FILES */
 
 function addFile() {
-
     const input = document.getElementById("fileInput");
 
-    if (input.files.length === 0) {
+    if (!input.files.length) {
         alert("Select a file first");
         return;
     }
 
     const file = input.files[0];
 
-    const div = document.createElement("div");
+    document.getElementById("fileList").innerHTML += `
+        <div class="item">
+            📄 ${file.name}
+            <br>
+            <small>${Math.round(file.size / 1024)} KB</small>
+        </div>
+    `;
 
-    div.className = "item";
-
-    div.innerHTML =
-        "📄 " + file.name +
-        "<br><small>" +
-        Math.round(file.size / 1024) +
-        " KB</small>";
-
-    document.getElementById("fileList").appendChild(div);
-
+    alert("File selected. Actual cloud storage will be added in the next stage.");
 }
-
-
-// CONTACTS
-
-function addContact() {
-
-    const name = document.getElementById("contactName").value;
-
-    const number = document.getElementById("contactNumber").value;
-
-    if (!name || !number) {
-
-        alert("Enter name and phone number");
-
-        return;
-
-    }
-
-    const div = document.createElement("div");
-
-    div.className = "item";
-
-    div.innerHTML =
-        "👤 <b>" + name +
-        "</b><br>📞 " + number;
-
-    document.getElementById("contactList").appendChild(div);
-
-    document.getElementById("contactName").value = "";
-
-    document.getElementById("contactNumber").value = "";
-
-}
-
-
-// NOTES
-
-function saveNote() {
-
-    const note = document.getElementById("noteText").value;
-
-    if (!note) {
-
-        alert("Write something first");
-
-        return;
-
-    }
-
-    document.getElementById("savedNote").innerHTML =
-        '<div class="item">📝 ' + note + '</div>';
-
-}
-
 </script>
 
 </body>
