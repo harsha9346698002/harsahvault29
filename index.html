@@ -1,17 +1,412 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private Vault</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Private Vault</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b1020;
+    color: white;
+}
+
+header {
+    padding: 20px;
+    background: #11182d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+}
+
+.welcome {
+    margin-bottom: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.card {
+    background: #151d35;
+    border-radius: 15px;
+    padding: 25px 15px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid #273354;
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    background: #1b2645;
+}
+
+.icon {
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+.card h3 {
+    margin: 5px 0;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 18px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.hidden {
+    display: none;
+}
+
+.section {
+    margin-top: 25px;
+    background: #11182d;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #39466b;
+    background: #0b1020;
+    color: white;
+}
+
+.item {
+    background: #18213b;
+    padding: 14px;
+    margin: 8px 0;
+    border-radius: 10px;
+}
+
+.back {
+    margin-bottom: 15px;
+}
+</style>
 </head>
 
 <body>
-    <h1>🔐 My Private Vault</h1>
-    <p>NFC Access Prototype</p>
 
-    <button onclick="alert('Access Granted!')">
-        Unlock Vault
-    </button>
+<header>
+    <h1>🔐 Private Vault</h1>
+    <span>🟢 Secure Mode</span>
+</header>
+
+<div class="container">
+
+    <div class="welcome">
+        <h2>Welcome to your Vault</h2>
+        <p>Your personal digital storage.</p>
+    </div>
+
+    <div class="grid">
+
+        <div class="card" onclick="openSection('folders')">
+            <div class="icon">📁</div>
+            <h3>Folders</h3>
+            <p>Create & manage folders</p>
+        </div>
+
+        <div class="card" onclick="openSection('files')">
+            <div class="icon">📄</div>
+            <h3>Files</h3>
+            <p>Store your files</p>
+        </div>
+
+        <div class="card" onclick="openSection('photos')">
+            <div class="icon">🖼️</div>
+            <h3>Photos</h3>
+            <p>Personal photos</p>
+        </div>
+
+        <div class="card" onclick="openSection('pdfs')">
+            <div class="icon">📑</div>
+            <h3>PDFs</h3>
+            <p>Documents</p>
+        </div>
+
+        <div class="card" onclick="openSection('contacts')">
+            <div class="icon">👤</div>
+            <h3>Contacts</h3>
+            <p>Private contacts</p>
+        </div>
+
+        <div class="card" onclick="openSection('notes')">
+            <div class="icon">📝</div>
+            <h3>Notes</h3>
+            <p>Private notes</p>
+        </div>
+
+    </div>
+
+    <!-- FOLDERS -->
+
+    <div id="folders" class="section hidden">
+
+        <button class="back" onclick="closeSections()">← Back</button>
+
+        <h2>📁 My Folders</h2>
+
+        <input id="folderName" placeholder="Enter folder name">
+
+        <button onclick="createFolder()">＋ Create Folder</button>
+
+        <div id="folderList"></div>
+
+    </div>
+
+
+    <!-- FILES -->
+
+    <div id="files" class="section hidden">
+
+        <button class="back" onclick="closeSections()">← Back</button>
+
+        <h2>📄 Files</h2>
+
+        <input type="file" id="fileInput">
+
+        <button onclick="addFile()">＋ Add File</button>
+
+        <div id="fileList"></div>
+
+    </div>
+
+
+    <!-- PHOTOS -->
+
+    <div id="photos" class="section hidden">
+
+        <button class="back" onclick="closeSections()">← Back</button>
+
+        <h2>🖼️ Photos</h2>
+
+        <input type="file" accept="image/*" multiple>
+
+        <p>Photo storage interface ready.</p>
+
+    </div>
+
+
+    <!-- PDF -->
+
+    <div id="pdfs" class="section hidden">
+
+        <button class="back" onclick="closeSections()">← Back</button>
+
+        <h2>📑 PDF Documents</h2>
+
+        <input type="file" accept="application/pdf" multiple>
+
+        <p>PDF storage interface ready.</p>
+
+    </div>
+
+
+    <!-- CONTACTS -->
+
+    <div id="contacts" class="section hidden">
+
+        <button class="back" onclick="closeSections()">← Back</button>
+
+        <h2>👤 Private Contacts</h2>
+
+        <input id="contactName" placeholder="Name">
+
+        <input id="contactNumber" placeholder="Phone number">
+
+        <button onclick="addContact()">＋ Add Contact</button>
+
+        <div id="contactList"></div>
+
+    </div>
+
+
+    <!-- NOTES -->
+
+    <div id="notes" class="section hidden">
+
+        <button class="back" onclick="closeSections()">← Back</button>
+
+        <h2>📝 Private Notes</h2>
+
+        <textarea
+            id="noteText"
+            style="width:100%;height:150px;background:#0b1020;color:white;padding:15px;border-radius:10px;"
+            placeholder="Write your private note..."
+        ></textarea>
+
+        <br><br>
+
+        <button onclick="saveNote()">💾 Save Note</button>
+
+        <div id="savedNote"></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function openSection(id) {
+
+    closeSections();
+
+    document.getElementById(id).classList.remove("hidden");
+
+}
+
+function closeSections() {
+
+    const sections = document.querySelectorAll(".section");
+
+    sections.forEach(section => {
+        section.classList.add("hidden");
+    });
+
+}
+
+
+// FOLDERS
+
+function createFolder() {
+
+    const name = document.getElementById("folderName").value;
+
+    if (!name) {
+        alert("Enter a folder name");
+        return;
+    }
+
+    const div = document.createElement("div");
+
+    div.className = "item";
+
+    div.innerHTML = "📁 " + name;
+
+    document.getElementById("folderList").appendChild(div);
+
+    document.getElementById("folderName").value = "";
+
+}
+
+
+// FILES
+
+function addFile() {
+
+    const input = document.getElementById("fileInput");
+
+    if (input.files.length === 0) {
+        alert("Select a file first");
+        return;
+    }
+
+    const file = input.files[0];
+
+    const div = document.createElement("div");
+
+    div.className = "item";
+
+    div.innerHTML =
+        "📄 " + file.name +
+        "<br><small>" +
+        Math.round(file.size / 1024) +
+        " KB</small>";
+
+    document.getElementById("fileList").appendChild(div);
+
+}
+
+
+// CONTACTS
+
+function addContact() {
+
+    const name = document.getElementById("contactName").value;
+
+    const number = document.getElementById("contactNumber").value;
+
+    if (!name || !number) {
+
+        alert("Enter name and phone number");
+
+        return;
+
+    }
+
+    const div = document.createElement("div");
+
+    div.className = "item";
+
+    div.innerHTML =
+        "👤 <b>" + name +
+        "</b><br>📞 " + number;
+
+    document.getElementById("contactList").appendChild(div);
+
+    document.getElementById("contactName").value = "";
+
+    document.getElementById("contactNumber").value = "";
+
+}
+
+
+// NOTES
+
+function saveNote() {
+
+    const note = document.getElementById("noteText").value;
+
+    if (!note) {
+
+        alert("Write something first");
+
+        return;
+
+    }
+
+    document.getElementById("savedNote").innerHTML =
+        '<div class="item">📝 ' + note + '</div>';
+
+}
+
+</script>
+
 </body>
 </html>
