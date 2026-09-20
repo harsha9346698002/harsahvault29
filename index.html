@@ -346,6 +346,33 @@ async function login() {
 }
 
 </script>
+async function resetPassword() {
 
+    const email = document.getElementById("email").value.trim();
+    const status = document.getElementById("loginStatus");
+
+    if (!email) {
+        status.textContent = "⚠️ Enter your email first.";
+        return;
+    }
+
+    status.textContent = "📧 Sending password reset email...";
+
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(
+        email,
+        {
+            redirectTo:
+                "https://harsha9346698002.github.io/harsahvault29/"
+        }
+    );
+
+    if (error) {
+        status.textContent = "❌ " + error.message;
+        return;
+    }
+
+    status.textContent =
+        "✅ Password reset link sent. Check your email.";
+}
 </body>
 </html>
