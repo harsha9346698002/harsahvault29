@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -116,203 +117,230 @@ input {
 .back {
     margin-bottom: 15px;
 }
+
+/* LOGIN SCREEN */
+
+#loginScreen {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 30px;
+    background: #11182d;
+    border-radius: 20px;
+    text-align: center;
+    border: 1px solid #273354;
+}
+
+#loginScreen .lockIcon {
+    font-size: 50px;
+}
+
+#loginScreen h1 {
+    margin-bottom: 10px;
+}
+
+#loginScreen p {
+    color: #9ca3af;
+}
+
+#loginScreen button {
+    width: 100%;
+    margin-top: 10px;
+}
+
+#loginStatus {
+    min-height: 20px;
+}
+
 </style>
+
 </head>
 
 <body>
 
+<!-- LOGIN SCREEN -->
+
+<div id="loginScreen">
+
+
+<div class="lockIcon">🔐</div>
+
+<h1>Private Vault</h1>
+
+<p>
+    Secure access to your personal vault
+</p>
+
+<input
+    type="email"
+    id="email"
+    placeholder="Email"
+    autocomplete="email"
+>
+
+<input
+    type="password"
+    id="password"
+    placeholder="Password"
+    autocomplete="current-password"
+>
+
+<button onclick="login()">
+    🔓 Unlock Vault
+</button>
+
+<p id="loginStatus"></p>
+
+
+</div>
+
+<!-- VAULT SCREEN -->
+
+<div id="vaultScreen" class="hidden">
+
+
 <header>
+
     <h1>🔐 Private Vault</h1>
+
     <span>🟢 Secure Mode</span>
+
 </header>
 
 <div class="container">
 
     <div class="welcome">
+
         <h2>Welcome to your Vault</h2>
-        <p>Your personal digital storage.</p>
+
+        <p>
+            Your personal digital storage.
+        </p>
+
     </div>
 
     <div class="grid">
 
-        <div class="card" onclick="openSection('folders')">
+        <div class="card">
             <div class="icon">📁</div>
             <h3>Folders</h3>
-            <p>Create & manage folders</p>
         </div>
 
-        <div class="card" onclick="openSection('files')">
+        <div class="card">
             <div class="icon">📄</div>
             <h3>Files</h3>
-            <p>Store your files</p>
         </div>
 
-        <div class="card" onclick="openSection('photos')">
+        <div class="card">
             <div class="icon">🖼️</div>
             <h3>Photos</h3>
-            <p>Personal photos</p>
         </div>
 
-        <div class="card" onclick="openSection('pdfs')">
+        <div class="card">
             <div class="icon">📑</div>
             <h3>PDFs</h3>
-            <p>Documents</p>
         </div>
 
-        <div class="card" onclick="openSection('contacts')">
+        <div class="card">
             <div class="icon">👤</div>
             <h3>Contacts</h3>
-            <p>Private contacts</p>
         </div>
 
-        <div class="card" onclick="openSection('notes')">
+        <div class="card">
             <div class="icon">📝</div>
             <h3>Notes</h3>
-            <p>Private notes</p>
         </div>
-
-    </div>
-
-    <!-- FOLDERS -->
-
-    <div id="folders" class="section hidden">
-
-        <button class="back" onclick="closeSections()">← Back</button>
-
-        <h2>📁 My Folders</h2>
-
-        <input id="folderName" placeholder="Enter folder name">
-
-        <button onclick="createFolder()">＋ Create Folder</button>
-
-        <div id="folderList"></div>
-
-    </div>
-
-
-    <!-- FILES -->
-
-    <div id="files" class="section hidden">
-
-        <button class="back" onclick="closeSections()">← Back</button>
-
-        <h2>📄 Files</h2>
-
-        <input type="file" id="fileInput">
-
-        <button onclick="addFile()">＋ Add File</button>
-
-        <div id="fileList"></div>
-
-    </div>
-
-
-    <!-- PHOTOS -->
-
-    <div id="photos" class="section hidden">
-
-        <button class="back" onclick="closeSections()">← Back</button>
-
-        <h2>🖼️ Photos</h2>
-
-        <input type="file" accept="image/*" multiple>
-
-        <p>Photo storage interface ready.</p>
-
-    </div>
-
-
-    <!-- PDF -->
-
-    <div id="pdfs" class="section hidden">
-
-        <button class="back" onclick="closeSections()">← Back</button>
-
-        <h2>📑 PDF Documents</h2>
-
-        <input type="file" accept="application/pdf" multiple>
-
-        <p>PDF storage interface ready.</p>
-
-    </div>
-
-
-    <!-- CONTACTS -->
-
-    <div id="contacts" class="section hidden">
-
-        <button class="back" onclick="closeSections()">← Back</button>
-
-        <h2>👤 Private Contacts</h2>
-
-        <input id="contactName" placeholder="Name">
-
-        <input id="contactNumber" placeholder="Phone number">
-
-        <button onclick="addContact()">＋ Add Contact</button>
-
-        <div id="contactList"></div>
-
-    </div>
-
-
-    <!-- NOTES -->
-
-    <div id="notes" class="section hidden">
-
-        <button class="back" onclick="closeSections()">← Back</button>
-
-        <h2>📝 Private Notes</h2>
-
-        <textarea
-            id="noteText"
-            style="width:100%;height:150px;background:#0b1020;color:white;padding:15px;border-radius:10px;"
-            placeholder="Write your private note..."
-        ></textarea>
-
-        <br><br>
-
-        <button onclick="saveNote()">💾 Save Note</button>
-
-        <div id="savedNote"></div>
 
     </div>
 
 </div>
 
+
+</div>
+
+<!-- SUPABASE -->
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const SUPABASE_URL = "https://wuvywetmzceyvfudplht.supabase.co";
-const SUPABASE_KEY = "sb_publishable_MlzdMgwVN_bfGLEhu60Z-A_MxAhC4tb";
+
+const SUPABASE_URL =
+    "https://wuvywetmzceyvfudplht.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_MlzdMgwVN_bfGLEhu60Z-A_MxAhC4tb";
+
 
 const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
+    SUPABASE_URL,
+    SUPABASE_KEY
 );
 
+
 async function login() {
-  const email = prompt("Enter your email:");
-  const password = prompt("Enter your password:");
 
-  if (!email || !password) return;
+    const email =
+        document.getElementById("email").value.trim();
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
+    const password =
+        document.getElementById("password").value;
 
-  if (error) {
-    alert("Login failed: " + error.message);
-    return;
-  }
+    const status =
+        document.getElementById("loginStatus");
 
-  alert("🔓 Vault unlocked!");
-  console.log("Logged in user:", data.user.id);
+
+    if (!email || !password) {
+
+        status.textContent =
+            "⚠️ Please enter your email and password.";
+
+        return;
+    }
+
+
+    status.textContent =
+        "🔄 Unlocking vault...";
+
+
+    const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+
+            email: email,
+
+            password: password
+
+        });
+
+
+    if (error) {
+
+        status.textContent =
+            "❌ " + error.message;
+
+        return;
+    }
+
+
+    status.textContent =
+        "🔓 Vault unlocked!";
+
+
+    document
+        .getElementById("loginScreen")
+        .classList.add("hidden");
+
+
+    document
+        .getElementById("vaultScreen")
+        .classList.remove("hidden");
+
+
+    console.log(
+        "Logged in user:",
+        data.user.id
+    );
+
 }
 
-
-  
 </script>
 
 </body>
