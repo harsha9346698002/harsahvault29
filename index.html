@@ -1,257 +1,1179 @@
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Private Vault</title>
+<title>Harsha Vault 29</title>
 
 <style>
+
+/* =========================
+   GLOBAL
+========================= */
+
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
+    background: #020604;
+    color: #eaffea;
     font-family: Arial, sans-serif;
-    background: #0b1020;
-    color: white;
+    overflow-x: hidden;
+}
+
+button {
+    font-family: inherit;
+}
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================
+   CYBER BACKGROUND
+========================= */
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(rgba(0,255,80,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,80,0.025) 1px, transparent 1px);
+    background-size: 35px 35px;
+}
+
+
+/* =========================
+   LOCK SCREEN
+========================= */
+
+#lockScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.lockBox {
+    width: 100%;
+    max-width: 520px;
+    text-align: center;
+    padding: 35px 25px;
+    background: rgba(4,12,7,0.95);
+    border: 1px solid #1cff55;
+    border-radius: 24px;
+    box-shadow:
+        0 0 25px rgba(0,255,80,0.12),
+        inset 0 0 30px rgba(0,255,80,0.025);
+}
+
+.systemText {
+    font-size: 12px;
+    letter-spacing: 4px;
+    color: #53ff7b;
+    margin-bottom: 12px;
+}
+
+.lockTitle {
+    font-size: 30px;
+    margin: 0;
+    color: #eaffea;
+}
+
+.lockSubtitle {
+    color: #7da587;
+    font-size: 13px;
+    margin-bottom: 30px;
+}
+
+
+/* =========================
+   CHALLENGE
+========================= */
+
+.challengeTitle {
+    color: #51ff78;
+    letter-spacing: 2px;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.challengeInfo {
+    color: #78947d;
+    font-size: 13px;
+    min-height: 20px;
+}
+
+.logoGrid {
+    width: 280px;
+    max-width: 100%;
+    margin: 28px auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.logoTile {
+    height: 115px;
+    border-radius: 18px;
+    border: 1px solid #286d3a;
+    background: linear-gradient(
+        145deg,
+        #07130a,
+        #0b1d10
+    );
+    color: #f0fff2;
+    font-size: 28px;
+    cursor: pointer;
+    position: relative;
+    transition: 0.25s;
+    box-shadow:
+        inset 0 0 15px rgba(0,255,80,0.03);
+}
+
+.logoTile:hover {
+    transform: translateY(-3px);
+    border-color: #2cff61;
+    box-shadow:
+        0 0 20px rgba(0,255,80,0.16);
+}
+
+.logoTile.selected {
+    border-color: #4cff78;
+    box-shadow:
+        0 0 25px rgba(0,255,80,0.35);
+    transform: scale(1.04);
+}
+
+.tileNumber {
+    position: absolute;
+    top: 9px;
+    left: 11px;
+    font-size: 10px;
+    color: #52755a;
+}
+
+.tileChinese {
+    font-family: "Noto Sans CJK SC", "Microsoft YaHei", serif;
+}
+
+.moveHint {
+    font-size: 12px;
+    color: #64806a;
+    margin-top: 15px;
+}
+
+.resetButton {
+    margin-top: 15px;
+    background: transparent;
+    color: #77a17d;
+    border: 1px solid #23492b;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.resetButton:hover {
+    border-color: #36ff65;
+    color: #b8ffc5;
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+#challengeStatus {
+    min-height: 24px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #55ff7b;
+}
+
+
+/* =========================
+   SUCCESS ANIMATION
+========================= */
+
+#successScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.authText {
+    color: #45ff70;
+    font-size: 12px;
+    letter-spacing: 5px;
+    opacity: 0;
+    animation: appear 1s forwards;
+}
+
+.chineseName {
+    margin-top: 20px;
+    font-size: 34px;
+    color: #eaffea;
+    letter-spacing: 5px;
+    opacity: 0;
+    animation: nameAppear 1.2s 0.8s forwards;
+}
+
+.harshaText {
+    font-family: "Brush Script MT", "Segoe Script", cursive;
+    font-size: 72px;
+    color: #53ff78;
+    text-shadow: 0 0 20px rgba(0,255,80,0.5);
+    opacity: 0;
+    transform: scale(0.8);
+    animation: harshaAppear 2s 2s forwards;
+}
+
+.openingText {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #5c8065;
+    letter-spacing: 4px;
+    opacity: 0;
+    animation: appear 1s 3.3s forwards;
+}
+
+@keyframes appear {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes nameAppear {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes harshaAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+/* =========================
+   VAULT
+========================= */
+
+#vaultScreen {
+    min-height: 100vh;
 }
 
 header {
-    padding: 20px;
-    background: #11182d;
+    padding: 18px 22px;
+    border-bottom: 1px solid #183d22;
+    background: rgba(3,10,5,0.95);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 20;
 }
 
 header h1 {
     margin: 0;
-    font-size: 22px;
+    font-size: 20px;
+}
+
+.secureStatus {
+    color: #4cff75;
+    font-size: 12px;
 }
 
 .container {
-    padding: 20px;
-    max-width: 1000px;
+    width: 100%;
+    max-width: 1050px;
     margin: auto;
+    padding: 25px 20px 60px;
 }
 
 .welcome {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
+
+.welcome h2 {
+    margin-bottom: 5px;
+}
+
+.welcome p {
+    color: #718c77;
+}
+
+
+/* =========================
+   VAULT CARDS
+========================= */
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
+    grid-template-columns:
+        repeat(auto-fit, minmax(145px, 1fr));
+    gap: 14px;
 }
 
 .card {
-    background: #151d35;
-    border-radius: 15px;
+    background: #07130a;
+    border: 1px solid #183d22;
+    border-radius: 18px;
     padding: 25px 15px;
     text-align: center;
     cursor: pointer;
-    border: 1px solid #273354;
-    transition: 0.2s;
+    transition: 0.25s;
 }
 
 .card:hover {
-    transform: translateY(-3px);
-    background: #1b2645;
+    border-color: #35ff68;
+    transform: translateY(-4px);
+    box-shadow:
+        0 10px 30px rgba(0,255,80,0.08);
 }
 
 .icon {
     font-size: 38px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .card h3 {
     margin: 5px 0;
 }
 
-button {
-    border: none;
-    border-radius: 10px;
-    padding: 12px 18px;
-    background: #2563eb;
-    color: white;
-    cursor: pointer;
-    font-size: 15px;
+.card p {
+    margin: 0;
+    color: #67816d;
+    font-size: 12px;
 }
 
-button:hover {
-    background: #1d4ed8;
-}
 
-.hidden {
-    display: none;
-}
+/* =========================
+   SECTIONS
+========================= */
 
 .section {
     margin-top: 25px;
-    background: #11182d;
+    background: #061009;
+    border: 1px solid #173a20;
     padding: 20px;
-    border-radius: 15px;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border: 1px solid #39466b;
-    background: #0b1020;
-    color: white;
-}
-
-.item {
-    background: #18213b;
-    padding: 14px;
-    margin: 8px 0;
-    border-radius: 10px;
+    border-radius: 18px;
 }
 
 .back {
-    margin-bottom: 15px;
+    background: transparent;
+    border: 1px solid #254b2d;
+    color: #91aa95;
+    padding: 9px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 18px;
 }
 
-/* LOGIN SCREEN */
-
-#loginScreen {
-    max-width: 400px;
-    margin: 100px auto;
-    padding: 30px;
-    background: #11182d;
-    border-radius: 20px;
-    text-align: center;
-    border: 1px solid #273354;
+.item {
+    background: #0a180d;
+    border: 1px solid #173b20;
+    padding: 15px;
+    margin: 9px 0;
+    border-radius: 12px;
 }
 
-#loginScreen .lockIcon {
-    font-size: 50px;
+
+/* =========================
+   PHOTO GALLERY
+========================= */
+
+.galleryHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-#loginScreen h1 {
-    margin-bottom: 10px;
+.gallery {
+    display: grid;
+    grid-template-columns:
+        repeat(3, 1fr);
+    gap: 4px;
+    margin-top: 15px;
 }
 
-#loginScreen p {
-    color: #9ca3af;
+.photo {
+    aspect-ratio: 1 / 1;
+    background:
+        linear-gradient(
+            135deg,
+            #0d2413,
+            #122f19
+        );
+    border: 1px solid #183d22;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
 }
 
-#loginScreen button {
-    width: 100%;
-    margin-top: 10px;
+.photo::after {
+    content: "PHOTO";
+    position: absolute;
+    bottom: 7px;
+    left: 7px;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: #72a17b;
 }
 
-#loginStatus {
-    min-height: 20px;
+.photo:hover {
+    border-color: #35ff68;
+}
+
+
+/* =========================
+   FULLSCREEN PHOTO VIEW
+========================= */
+
+#photoViewer {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.96);
+    z-index: 80;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.viewerBox {
+    width: 90%;
+    max-width: 700px;
+    aspect-ratio: 4 / 3;
+    background: #071009;
+    border: 1px solid #35ff68;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.viewerText {
+    color: #568060;
+    letter-spacing: 3px;
+}
+
+.closeViewer {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    color: white;
+    border: 1px solid #315a38;
+    border-radius: 7px;
+    padding: 7px 10px;
+    cursor: pointer;
+}
+
+
+/* =========================
+   LOCK BUTTON
+========================= */
+
+.lockButton {
+    background: transparent;
+    border: 1px solid #4d2222;
+    color: #d99a9a;
+    padding: 9px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.lockButton:hover {
+    border-color: #ff5555;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    .lockBox {
+        padding: 28px 15px;
+    }
+
+    .logoGrid {
+        width: 250px;
+    }
+
+    .logoTile {
+        height: 105px;
+        font-size: 25px;
+    }
+
+    .harshaText {
+        font-size: 55px;
+    }
+
+    .chineseName {
+        font-size: 25px;
+    }
+
+    header {
+        padding: 15px;
+    }
+
+    header h1 {
+        font-size: 17px;
+    }
+
 }
 
 </style>
-
 </head>
+
 
 <body>
 
-<!-- LOGIN SCREEN -->
 
-<div id="loginScreen">
+<!-- =====================================================
+     LOCK SCREEN
+===================================================== -->
+
+<div id="lockScreen">
+
+    <div class="lockBox">
+
+        <div class="systemText">
+            PRIVATE SYSTEM // VAULT 29
+        </div>
+
+        <h1 class="lockTitle">
+            🔐 PRIVATE VAULT
+        </h1>
+
+        <p class="lockSubtitle">
+            Pattern authentication required
+        </p>
 
 
-<div class="lockIcon">🔐</div>
+        <!-- =========================
+             CHALLENGE 1
+        ========================== -->
 
-<h1>Private Vault</h1>
+        <div id="challenge1">
 
-<p>
-    Secure access to your personal vault
-</p>
+            <div class="challengeTitle">
+                CHALLENGE 01
+            </div>
 
-<input
-    type="email"
-    id="email"
-    placeholder="Email"
-    autocomplete="email"
->
+            <div class="challengeInfo">
+                Select the correct movement sequence
+            </div>
 
-<input
-    type="password"
-    id="password"
-    placeholder="Password"
-    autocomplete="current-password"
->
 
-<button onclick="login()">
-    🔓 Unlock Vault
-</button>
+            <div class="logoGrid" id="grid1">
 
-<button onclick="resetPassword()" style="background:#374151;">
-    🔑 Forgot Password?
-</button>
+                <button class="logoTile"
+                    data-id="1"
+                    onclick="selectTile(1)">
 
-<p id="loginStatus"></p>
+                    <span class="tileNumber">
+                        01
+                    </span>
 
+                    <span class="tileChinese">
+                        阿克
+                    </span>
+
+                </button>
+
+
+                <button class="logoTile"
+                    data-id="2"
+                    onclick="selectTile(2)">
+
+                    <span class="tileNumber">
+                        02
+                    </span>
+
+                    <span class="tileChinese">
+                        沙雅
+                    </span>
+
+                </button>
+
+
+                <button class="logoTile"
+                    data-id="3"
+                    onclick="selectTile(3)">
+
+                    <span class="tileNumber">
+                        03
+                    </span>
+
+                    <span class="tileChinese">
+                        青影
+                    </span>
+
+                </button>
+
+
+                <button class="logoTile"
+                    data-id="4"
+                    onclick="selectTile(4)">
+
+                    <span class="tileNumber">
+                        04
+                    </span>
+
+                    <span class="tileChinese">
+                        龙门
+                    </span>
+
+                </button>
+
+            </div>
+
+
+            <div class="moveHint">
+                Move the correct tiles in sequence
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             CHALLENGE 2
+        ========================== -->
+
+        <div id="challenge2" class="hidden">
+
+            <div class="challengeTitle">
+                CHALLENGE 02
+            </div>
+
+            <div class="challengeInfo">
+                Second authentication sequence
+            </div>
+
+
+            <div class="logoGrid" id="grid2">
+
+                <button class="logoTile"
+                    data-id="1"
+                    onclick="selectTile2(1)">
+
+                    <span class="tileNumber">
+                        01
+                    </span>
+
+                    <span class="tileChinese">
+                        阿克
+                    </span>
+
+                </button>
+
+
+                <button class="logoTile"
+                    data-id="2"
+                    onclick="selectTile2(2)">
+
+                    <span class="tileNumber">
+                        02
+                    </span>
+
+                    <span class="tileChinese">
+                        沙雅
+                    </span>
+
+                </button>
+
+
+                <button class="logoTile"
+                    data-id="3"
+                    onclick="selectTile2(3)">
+
+                    <span class="tileNumber">
+                        03
+                    </span>
+
+                    <span class="tileChinese">
+                        哈尔
+                    </span>
+
+                </button>
+
+
+                <button class="logoTile"
+                    data-id="4"
+                    onclick="selectTile2(4)">
+
+                    <span class="tileNumber">
+                        04
+                    </span>
+
+                    <span class="tileChinese">
+                        沙
+                    </span>
+
+                </button>
+
+            </div>
+
+
+            <div class="moveHint">
+                Continue the second sequence
+            </div>
+
+        </div>
+
+
+        <div id="challengeStatus"></div>
+
+
+        <button
+            class="resetButton"
+            onclick="resetPuzzle()">
+
+            ↻ Reset
+
+        </button>
+
+    </div>
 
 </div>
 
-<!-- VAULT SCREEN -->
+
+<!-- =====================================================
+     SUCCESS SCREEN
+===================================================== -->
+
+<div id="successScreen" class="hidden">
+
+    <div class="authText">
+        AUTHENTICATION VERIFIED
+    </div>
+
+    <div class="chineseName">
+        阿克沙雅·哈尔沙
+    </div>
+
+    <div class="harshaText">
+        harsha29
+    </div>
+
+    <div class="openingText">
+        VAULT OPENING...
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     VAULT
+===================================================== -->
 
 <div id="vaultScreen" class="hidden">
 
+    <header>
 
-<header>
+        <h1>
+            🔐 Harsha Vault 29
+        </h1>
 
-    <h1>🔐 Private Vault</h1>
+        <div style="display:flex;gap:12px;align-items:center;">
 
-    <span>🟢 Secure Mode</span>
+            <span class="secureStatus">
+                ● SECURE MODE
+            </span>
 
-</header>
+            <button
+                class="lockButton"
+                onclick="lockVault()">
 
-<div class="container">
+                🔒 Lock
 
-    <div class="welcome">
+            </button>
 
-        <h2>Welcome to your Vault</h2>
-
-        <p>
-            Your personal digital storage.
-        </p>
-
-    </div>
-
-    <div class="grid">
-
-        <div class="card">
-            <div class="icon">📁</div>
-            <h3>Folders</h3>
         </div>
 
-        <div class="card">
-            <div class="icon">📄</div>
-            <h3>Files</h3>
+    </header>
+
+
+    <div class="container">
+
+
+        <div class="welcome">
+
+            <h2>
+                Welcome to your Vault
+            </h2>
+
+            <p>
+                Your private digital space.
+            </p>
+
         </div>
 
-        <div class="card">
-            <div class="icon">🖼️</div>
-            <h3>Photos</h3>
+
+        <!-- =========================
+             MAIN CATEGORIES
+        ========================== -->
+
+        <div class="grid">
+
+
+            <div
+                class="card"
+                onclick="openSection('folders')">
+
+                <div class="icon">
+                    📁
+                </div>
+
+                <h3>
+                    Folders
+                </h3>
+
+                <p>
+                    Organize everything
+                </p>
+
+            </div>
+
+
+            <div
+                class="card"
+                onclick="openSection('files')">
+
+                <div class="icon">
+                    📄
+                </div>
+
+                <h3>
+                    Files
+                </h3>
+
+                <p>
+                    Private documents
+                </p>
+
+            </div>
+
+
+            <div
+                class="card"
+                onclick="openPhotos()">
+
+                <div class="icon">
+                    🖼️
+                </div>
+
+                <h3>
+                    Photos
+                </h3>
+
+                <p>
+                    Gallery
+                </p>
+
+            </div>
+
+
+            <div
+                class="card"
+                onclick="openSection('pdfs')">
+
+                <div class="icon">
+                    📑
+                </div>
+
+                <h3>
+                    PDFs
+                </h3>
+
+                <p>
+                    Documents
+                </p>
+
+            </div>
+
+
+            <div
+                class="card"
+                onclick="openSection('contacts')">
+
+                <div class="icon">
+                    👤
+                </div>
+
+                <h3>
+                    Contacts
+                </h3>
+
+                <p>
+                    Private contacts
+                </p>
+
+            </div>
+
+
+            <div
+                class="card"
+                onclick="openSection('notes')">
+
+                <div class="icon">
+                    📝
+                </div>
+
+                <h3>
+                    Notes
+                </h3>
+
+                <p>
+                    Personal notes
+                </p>
+
+            </div>
+
+
         </div>
 
-        <div class="card">
-            <div class="icon">📑</div>
-            <h3>PDFs</h3>
+
+        <!-- =========================
+             FOLDERS
+        ========================== -->
+
+        <div
+            id="folders"
+            class="section hidden">
+
+            <button
+                class="back"
+                onclick="closeSections()">
+
+                ← Back
+
+            </button>
+
+            <h2>
+                📁 Folders
+            </h2>
+
+            <div class="item">
+                📁 Personal
+            </div>
+
+            <div class="item">
+                📁 Projects
+            </div>
+
+            <div class="item">
+                📁 Important
+            </div>
+
         </div>
 
-        <div class="card">
-            <div class="icon">👤</div>
-            <h3>Contacts</h3>
+
+        <!-- =========================
+             FILES
+        ========================== -->
+
+        <div
+            id="files"
+            class="section hidden">
+
+            <button
+                class="back"
+                onclick="closeSections()">
+
+                ← Back
+
+            </button>
+
+            <h2>
+                📄 Files
+            </h2>
+
+            <div class="item">
+                No files uploaded yet.
+            </div>
+
         </div>
 
-        <div class="card">
-            <div class="icon">📝</div>
-            <h3>Notes</h3>
+
+        <!-- =========================
+             PDFs
+        ========================== -->
+
+        <div
+            id="pdfs"
+            class="section hidden">
+
+            <button
+                class="back"
+                onclick="closeSections()">
+
+                ← Back
+
+            </button>
+
+            <h2>
+                📑 PDFs
+            </h2>
+
+            <div class="item">
+                No PDFs uploaded yet.
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             CONTACTS
+        ========================== -->
+
+        <div
+            id="contacts"
+            class="section hidden">
+
+            <button
+                class="back"
+                onclick="closeSections()">
+
+                ← Back
+
+            </button>
+
+            <h2>
+                👤 Contacts
+            </h2>
+
+            <div class="item">
+                No contacts saved yet.
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             NOTES
+        ========================== -->
+
+        <div
+            id="notes"
+            class="section hidden">
+
+            <button
+                class="back"
+                onclick="closeSections()">
+
+                ← Back
+
+            </button>
+
+            <h2>
+                📝 Notes
+            </h2>
+
+            <div class="item">
+                No notes created yet.
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             PHOTOS
+        ========================== -->
+
+        <div
+            id="photos"
+            class="section hidden">
+
+            <div class="galleryHeader">
+
+                <h2>
+                    🖼️ Photos
+                </h2>
+
+                <button
+                    class="back"
+                    onclick="closeSections()">
+
+                    ← Back
+
+                </button>
+
+            </div>
+
+
+            <div class="gallery">
+
+
+                <div
+                    class="photo"
+                    onclick="viewPhoto()">
+                </div>
+
+
+                <div
+                    class="photo"
+                    onclick="viewPhoto()">
+                </div>
+
+
+                <div
+                    class="photo"
+                    onclick="viewPhoto()">
+                </div>
+
+
+                <div
+                    class="photo"
+                    onclick="viewPhoto()">
+                </div>
+
+
+                <div
+                    class="photo"
+                    onclick="viewPhoto()">
+                </div>
+
+
+                <div
+                    class="photo"
+                    onclick="viewPhoto()">
+                </div>
+
+
+            </div>
+
         </div>
 
     </div>
@@ -259,120 +1181,406 @@ input {
 </div>
 
 
+<!-- =====================================================
+     PHOTO VIEWER
+===================================================== -->
+
+<div id="photoViewer">
+
+    <div class="viewerBox">
+
+        <button
+            class="closeViewer"
+            onclick="closePhoto()">
+
+            ✕
+
+        </button>
+
+        <div class="viewerText">
+            PHOTO PREVIEW
+        </div>
+
+    </div>
+
 </div>
 
-<!-- SUPABASE -->
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
-const SUPABASE_URL =
-    "https://wuvywetmzceyvfudplht.supabase.co";
+/* =====================================================
+   PUZZLE VARIABLES
+===================================================== */
 
-const SUPABASE_KEY =
-    "sb_publishable_MlzdMgwVN_bfGLEhu60Z-A_MxAhC4tb";
-
-
-const supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+let challenge1Sequence = [];
+let challenge2Sequence = [];
 
 
-async function login() {
+/* =====================================================
+   CHALLENGE 1
+   REQUIRED:
+   1 → 2
+   2 → 4
 
-    const email =
-        document.getElementById("email").value.trim();
+   Therefore:
+   [1,2]
+   then
+   [1,2,4]
+===================================================== */
 
-    const password =
-        document.getElementById("password").value;
+function selectTile(id) {
 
-    const status =
-        document.getElementById("loginStatus");
+    challenge1Sequence.push(id);
+
+    const tiles =
+        document.querySelectorAll("#grid1 .logoTile");
+
+    tiles.forEach(tile => {
+
+        tile.classList.remove("selected");
+
+    });
+
+    const selected =
+        document.querySelector(
+            '#grid1 .logoTile[data-id="' + id + '"]'
+        );
+
+    if (selected) {
+        selected.classList.add("selected");
+    }
 
 
-    if (!email || !password) {
+    const current =
+        challenge1Sequence.join(",");
 
-        status.textContent =
-            "⚠️ Please enter your email and password.";
+
+    if (current === "1") {
+
+        setStatus(
+            "✓ First tile accepted"
+        );
 
         return;
     }
 
 
-    status.textContent =
-        "🔄 Unlocking vault...";
+    if (current === "1,2") {
 
-
-    const { data, error } =
-        await supabaseClient.auth.signInWithPassword({
-
-            email: email,
-
-            password: password
-
-        });
-
-
-    if (error) {
-
-        status.textContent =
-            "❌ " + error.message;
+        setStatus(
+            "✓ Second tile accepted"
+        );
 
         return;
     }
 
 
-    status.textContent =
-        "🔓 Vault unlocked!";
+    if (current === "1,2,4") {
 
+        setStatus(
+            "✓ CHALLENGE 01 VERIFIED"
+        );
+
+        setTimeout(() => {
+
+            startChallenge2();
+
+        }, 700);
+
+        return;
+    }
+
+
+    wrongMove();
+
+}
+
+
+/* =====================================================
+   CHALLENGE 2
+   REQUIRED:
+   3 → 4
+   4 → 2
+
+   Sequence:
+   3 → 4 → 2
+===================================================== */
+
+function selectTile2(id) {
+
+    challenge2Sequence.push(id);
+
+    const tiles =
+        document.querySelectorAll("#grid2 .logoTile");
+
+    tiles.forEach(tile => {
+
+        tile.classList.remove("selected");
+
+    });
+
+    const selected =
+        document.querySelector(
+            '#grid2 .logoTile[data-id="' + id + '"]'
+        );
+
+    if (selected) {
+        selected.classList.add("selected");
+    }
+
+
+    const current =
+        challenge2Sequence.join(",");
+
+
+    if (current === "3") {
+
+        setStatus(
+            "✓ Third tile accepted"
+        );
+
+        return;
+    }
+
+
+    if (current === "3,4") {
+
+        setStatus(
+            "✓ Fourth tile accepted"
+        );
+
+        return;
+    }
+
+
+    if (current === "3,4,2") {
+
+        setStatus(
+            "✓ CHALLENGE 02 VERIFIED"
+        );
+
+        setTimeout(() => {
+
+            unlockVault();
+
+        }, 700);
+
+        return;
+    }
+
+
+    wrongMove();
+
+}
+
+
+/* =====================================================
+   START CHALLENGE 2
+===================================================== */
+
+function startChallenge2() {
+
+    challenge1Sequence = [];
 
     document
-        .getElementById("loginScreen")
+        .getElementById("challenge1")
+        .classList.add("hidden");
+
+    document
+        .getElementById("challenge2")
+        .classList.remove("hidden");
+
+    setStatus(
+        "SECOND AUTHENTICATION REQUIRED"
+    );
+
+}
+
+
+/* =====================================================
+   WRONG MOVE
+===================================================== */
+
+function wrongMove() {
+
+    setStatus(
+        "✕ Incorrect sequence — reset"
+    );
+
+    setTimeout(() => {
+
+        resetPuzzle();
+
+    }, 700);
+
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+function setStatus(message) {
+
+    document
+        .getElementById("challengeStatus")
+        .textContent = message;
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetPuzzle() {
+
+    challenge1Sequence = [];
+    challenge2Sequence = [];
+
+    document
+        .getElementById("challenge1")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("challenge2")
         .classList.add("hidden");
 
 
     document
+        .querySelectorAll(".logoTile")
+        .forEach(tile => {
+
+            tile.classList.remove("selected");
+
+        });
+
+
+    setStatus(
+        "READY FOR AUTHENTICATION"
+    );
+
+}
+
+
+/* =====================================================
+   UNLOCK ANIMATION
+===================================================== */
+
+function unlockVault() {
+
+    document
+        .getElementById("lockScreen")
+        .classList.add("hidden");
+
+    const success =
+        document.getElementById("successScreen");
+
+    success.classList.remove("hidden");
+
+
+    setTimeout(() => {
+
+        success.classList.add("hidden");
+
+        document
+            .getElementById("vaultScreen")
+            .classList.remove("hidden");
+
+    }, 5200);
+
+}
+
+
+/* =====================================================
+   LOCK VAULT
+===================================================== */
+
+function lockVault() {
+
+    document
         .getElementById("vaultScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("successScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("lockScreen")
         .classList.remove("hidden");
 
+    resetPuzzle();
 
-    console.log(
-        "Logged in user:",
-        data.user.id
-    );
+}
+
+
+/* =====================================================
+   OPEN SECTION
+===================================================== */
+
+function openSection(id) {
+
+    closeSections();
+
+    document
+        .getElementById(id)
+        .classList.remove("hidden");
+
+}
+
+
+/* =====================================================
+   PHOTOS
+===================================================== */
+
+function openPhotos() {
+
+    closeSections();
+
+    document
+        .getElementById("photos")
+        .classList.remove("hidden");
+
+}
+
+
+function viewPhoto() {
+
+    document
+        .getElementById("photoViewer")
+        .style.display = "flex";
+
+}
+
+
+function closePhoto() {
+
+    document
+        .getElementById("photoViewer")
+        .style.display = "none";
+
+}
+
+
+/* =====================================================
+   CLOSE ALL SECTIONS
+===================================================== */
+
+function closeSections() {
+
+    const sections =
+        document.querySelectorAll(".section");
+
+    sections.forEach(section => {
+
+        section.classList.add("hidden");
+
+    });
 
 }
 
 </script>
-async function resetPassword() {
 
-    const email = document.getElementById("email").value.trim();
-    const status = document.getElementById("loginStatus");
-
-    if (!email) {
-        status.textContent = "⚠️ Enter your email first.";
-        return;
-    }
-
-    status.textContent = "📧 Sending password reset email...";
-
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(
-        email,
-        {
-            redirectTo:
-                "https://harsha9346698002.github.io/harsahvault29/"
-        }
-    );
-
-    if (error) {
-        status.textContent = "❌ " + error.message;
-        return;
-    }
-
-    status.textContent =
-        "✅ Password reset link sent. Check your email.";
-}
 </body>
 </html>
