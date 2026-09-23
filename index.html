@@ -1,1583 +1,2660 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Harsha Vault 29</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-
-/* =========================
-   GLOBAL
-========================= */
-
-* {
-    box-sizing: border-box;
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
-body {
-    margin: 0;
-    background: #020604;
-    color: #eaffea;
-    font-family: Arial, sans-serif;
-    overflow-x: hidden;
+:root{
+    --bg:#050807;
+    --panel:#09120e;
+    --panel2:#0c1812;
+    --green:#00ff9c;
+    --green2:#00c978;
+    --text:#eafff4;
+    --muted:#729080;
+    --red:#ff4055;
+    --border:rgba(0,255,156,.28);
 }
 
-button {
-    font-family: inherit;
-}
-
-.hidden {
-    display: none !important;
-}
-
-
-/* =========================
-   CYBER BACKGROUND
-========================= */
-
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
+body{
     background:
-        linear-gradient(rgba(0,255,80,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,255,80,0.025) 1px, transparent 1px);
-    background-size: 35px 35px;
+      radial-gradient(circle at 50% -10%,rgba(0,255,156,.10),transparent 35%),
+      var(--bg);
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
+    min-height:100vh;
 }
 
-
-/* =========================
-   LOCK SCREEN
-========================= */
-
-#lockScreen {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+button,
+input{
+    font:inherit;
 }
 
-.lockBox {
-    width: 100%;
-    max-width: 520px;
-    text-align: center;
-    padding: 35px 25px;
-    background: rgba(4,12,7,0.95);
-    border: 1px solid #1cff55;
-    border-radius: 24px;
+button{
+    cursor:pointer;
+}
+
+/* ================= LOCK SCREEN ================= */
+
+#lockScreen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.lockBox{
+    width:100%;
+    max-width:570px;
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:30px;
+    background:linear-gradient(145deg,#08120d,#030705);
     box-shadow:
-        0 0 25px rgba(0,255,80,0.12),
-        inset 0 0 30px rgba(0,255,80,0.025);
+      0 0 50px rgba(0,255,156,.08),
+      inset 0 0 30px rgba(0,255,156,.02);
 }
 
-.systemText {
-    font-size: 12px;
-    letter-spacing: 4px;
-    color: #53ff7b;
-    margin-bottom: 12px;
+.logo{
+    text-align:center;
+    color:var(--green);
+    font-weight:bold;
+    letter-spacing:4px;
+    font-size:21px;
 }
 
-.lockTitle {
-    font-size: 30px;
-    margin: 0;
-    color: #eaffea;
+.logoSmall{
+    text-align:center;
+    color:var(--muted);
+    letter-spacing:3px;
+    font-size:10px;
+    margin-top:7px;
 }
 
-.lockSubtitle {
-    color: #7da587;
-    font-size: 13px;
-    margin-bottom: 30px;
+.status{
+    margin:24px 0;
+    border:1px solid rgba(0,255,156,.18);
+    background:#050b08;
+    padding:12px;
+    border-radius:10px;
+    font-family:monospace;
+    font-size:12px;
+    color:var(--green);
 }
 
-
-/* =========================
-   CHALLENGE
-========================= */
-
-.challengeTitle {
-    color: #51ff78;
-    letter-spacing: 2px;
-    font-size: 16px;
-    margin-bottom: 8px;
+.challenge{
+    display:none;
 }
 
-.challengeInfo {
-    color: #78947d;
-    font-size: 13px;
-    min-height: 20px;
+.challenge.active{
+    display:block;
 }
 
-.logoGrid {
-    width: 280px;
-    max-width: 100%;
-    margin: 28px auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+.challengeTitle{
+    color:var(--green);
+    font-size:13px;
+    letter-spacing:2px;
+    margin-bottom:8px;
 }
 
-.logoTile {
-    height: 115px;
-    border-radius: 18px;
-    border: 1px solid #286d3a;
-    background: linear-gradient(
-        145deg,
-        #07130a,
-        #0b1d10
-    );
-    color: #f0fff2;
-    font-size: 28px;
-    cursor: pointer;
-    position: relative;
-    transition: 0.25s;
-    box-shadow:
-        inset 0 0 15px rgba(0,255,80,0.03);
+.challengeInfo{
+    color:var(--muted);
+    font-size:12px;
+    margin-bottom:20px;
+    line-height:1.5;
 }
 
-.logoTile:hover {
-    transform: translateY(-3px);
-    border-color: #2cff61;
-    box-shadow:
-        0 0 20px rgba(0,255,80,0.16);
+.wordGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
 }
 
-.logoTile.selected {
-    border-color: #4cff78;
-    box-shadow:
-        0 0 25px rgba(0,255,80,0.35);
-    transform: scale(1.04);
+.word{
+    position:relative;
+    min-height:115px;
+    border:1px solid rgba(0,255,156,.35);
+    background:linear-gradient(145deg,#0a1710,#06100b);
+    border-radius:16px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    user-select:none;
+    touch-action:none;
+    transition:.25s;
 }
 
-.tileNumber {
-    position: absolute;
-    top: 9px;
-    left: 11px;
-    font-size: 10px;
-    color: #52755a;
+.word:hover{
+    border-color:var(--green);
+    box-shadow:0 0 20px rgba(0,255,156,.12);
 }
 
-.tileChinese {
-    font-family: "Noto Sans CJK SC", "Microsoft YaHei", serif;
+.word.dragging{
+    transform:scale(1.05);
+    border-color:var(--green);
+    box-shadow:0 0 35px rgba(0,255,156,.30);
+    z-index:10;
 }
 
-.moveHint {
-    font-size: 12px;
-    color: #64806a;
-    margin-top: 15px;
+.word.target{
+    border-color:var(--green);
+    box-shadow:0 0 25px rgba(0,255,156,.20);
 }
 
-.resetButton {
-    margin-top: 15px;
-    background: transparent;
-    color: #77a17d;
-    border: 1px solid #23492b;
-    padding: 9px 16px;
-    border-radius: 8px;
-    cursor: pointer;
+.word.correct{
+    animation:correctMove .5s ease;
 }
 
-.resetButton:hover {
-    border-color: #36ff65;
-    color: #b8ffc5;
+.word.wrong{
+    animation:shake .35s ease;
+    border-color:var(--red);
 }
 
-
-/* =========================
-   STATUS
-========================= */
-
-#challengeStatus {
-    min-height: 24px;
-    margin-top: 10px;
-    font-size: 13px;
-    color: #55ff7b;
+.wordNumber{
+    position:absolute;
+    top:9px;
+    left:11px;
+    color:#426354;
+    font-size:10px;
 }
 
-
-/* =========================
-   SUCCESS ANIMATION
-========================= */
-
-#successScreen {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: #000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+.chinese{
+    font-family:"Noto Sans CJK SC","Microsoft YaHei",serif;
+    font-size:30px;
+    font-weight:bold;
 }
 
-.authText {
-    color: #45ff70;
-    font-size: 12px;
-    letter-spacing: 5px;
-    opacity: 0;
-    animation: appear 1s forwards;
+.phonetic{
+    margin-top:7px;
+    color:#4e7160;
+    font-size:9px;
+    letter-spacing:1px;
 }
 
-.chineseName {
-    margin-top: 20px;
-    font-size: 34px;
-    color: #eaffea;
-    letter-spacing: 5px;
-    opacity: 0;
-    animation: nameAppear 1.2s 0.8s forwards;
+.progress{
+    margin-top:18px;
+    display:flex;
+    gap:7px;
+    justify-content:center;
 }
 
-.harshaText {
-    font-family: "Brush Script MT", "Segoe Script", cursive;
-    font-size: 72px;
-    color: #53ff78;
-    text-shadow: 0 0 20px rgba(0,255,80,0.5);
-    opacity: 0;
-    transform: scale(0.8);
-    animation: harshaAppear 2s 2s forwards;
+.dot{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#173326;
 }
 
-.openingText {
-    margin-top: 10px;
-    font-size: 11px;
-    color: #5c8065;
-    letter-spacing: 4px;
-    opacity: 0;
-    animation: appear 1s 3.3s forwards;
+.dot.active{
+    background:var(--green);
+    box-shadow:0 0 8px var(--green);
 }
 
-@keyframes appear {
-    to {
-        opacity: 1;
+.resetBtn{
+    width:100%;
+    margin-top:20px;
+    padding:13px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.12);
+    background:#07100b;
+    color:#718a7c;
+}
+
+.resetBtn:hover{
+    color:white;
+    border-color:var(--green);
+}
+
+.success{
+    display:none;
+    text-align:center;
+}
+
+.success.show{
+    display:block;
+}
+
+.successIcon{
+    width:70px;
+    height:70px;
+    margin:10px auto 20px;
+    border:2px solid var(--green);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--green);
+    font-size:34px;
+    box-shadow:0 0 35px rgba(0,255,156,.2);
+}
+
+.successTitle{
+    color:var(--green);
+    letter-spacing:3px;
+    font-size:13px;
+}
+
+.chineseName{
+    margin-top:18px;
+    font-size:31px;
+    font-family:serif;
+}
+
+.signature{
+    margin-top:10px;
+    font-family:cursive;
+    color:var(--green);
+    font-size:34px;
+    animation:signature .8s ease;
+}
+
+.opening{
+    margin-top:15px;
+    color:#668072;
+    font-family:monospace;
+    font-size:11px;
+}
+
+/* ================= APP ================= */
+
+#vault{
+    display:none;
+    min-height:100vh;
+}
+
+.topbar{
+    height:65px;
+    border-bottom:1px solid rgba(0,255,156,.15);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+    background:rgba(3,8,5,.95);
+    position:sticky;
+    top:0;
+    z-index:50;
+}
+
+.brand{
+    color:var(--green);
+    font-weight:bold;
+    letter-spacing:3px;
+}
+
+.brand span{
+    display:block;
+    color:#4d6659;
+    font-size:8px;
+    letter-spacing:2px;
+    margin-top:4px;
+}
+
+.topActions{
+    display:flex;
+    gap:8px;
+}
+
+.iconBtn{
+    border:1px solid rgba(0,255,156,.22);
+    background:#08110c;
+    color:var(--green);
+    width:40px;
+    height:40px;
+    border-radius:10px;
+}
+
+.layout{
+    display:flex;
+    min-height:calc(100vh - 65px);
+}
+
+.sidebar{
+    width:220px;
+    border-right:1px solid rgba(0,255,156,.13);
+    padding:22px 15px;
+    background:#060c08;
+}
+
+.navBtn{
+    width:100%;
+    padding:13px;
+    border:0;
+    background:transparent;
+    color:#6e8578;
+    text-align:left;
+    border-radius:10px;
+    margin-bottom:5px;
+}
+
+.navBtn:hover,
+.navBtn.active{
+    background:rgba(0,255,156,.09);
+    color:var(--green);
+}
+
+.storageMini{
+    margin-top:30px;
+    border-top:1px solid rgba(0,255,156,.12);
+    padding-top:20px;
+}
+
+.storageText{
+    font-size:10px;
+    color:#62796c;
+    margin-bottom:8px;
+}
+
+.storageBar{
+    height:5px;
+    background:#17251d;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.storageFill{
+    width:0%;
+    height:100%;
+    background:var(--green);
+}
+
+.lockVault{
+    margin-top:20px;
+    width:100%;
+    border:1px solid rgba(255,64,85,.45);
+    color:#ff6575;
+    background:#13080b;
+    padding:11px;
+    border-radius:10px;
+}
+
+.main{
+    flex:1;
+    padding:28px;
+    max-width:1400px;
+    margin:auto;
+    width:100%;
+}
+
+.welcome{
+    margin-bottom:25px;
+}
+
+.welcome h1{
+    font-size:27px;
+}
+
+.welcome p{
+    color:#667c70;
+    margin-top:7px;
+    font-size:13px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:13px;
+}
+
+.card{
+    border:1px solid rgba(0,255,156,.17);
+    background:#08110c;
+    border-radius:15px;
+    padding:18px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+    border-color:var(--green);
+}
+
+.cardIcon{
+    font-size:25px;
+}
+
+.cardName{
+    margin-top:14px;
+    font-weight:bold;
+}
+
+.cardCount{
+    color:#61776a;
+    font-size:11px;
+    margin-top:5px;
+}
+
+.section{
+    margin-top:30px;
+}
+
+.sectionHead{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.sectionHead h2{
+    font-size:17px;
+}
+
+.addBtn{
+    border:1px solid var(--green);
+    color:var(--green);
+    background:#06100a;
+    border-radius:9px;
+    padding:9px 14px;
+}
+
+.addBtn:hover{
+    background:rgba(0,255,156,.1);
+}
+
+/* ================= PHOTO GALLERY ================= */
+
+.gallery{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:7px;
+}
+
+.photo{
+    aspect-ratio:1/1;
+    border-radius:8px;
+    overflow:hidden;
+    background:#0a1510;
+    border:1px solid rgba(0,255,156,.12);
+    cursor:pointer;
+}
+
+.photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:.25s;
+}
+
+.photo:hover img{
+    transform:scale(1.05);
+}
+
+.empty{
+    padding:45px 20px;
+    border:1px dashed rgba(0,255,156,.18);
+    border-radius:14px;
+    text-align:center;
+    color:#536a5d;
+}
+
+/* ================= FILES ================= */
+
+.fileList{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.file{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px;
+    border:1px solid rgba(0,255,156,.13);
+    background:#08100b;
+    border-radius:11px;
+}
+
+.fileIcon{
+    width:40px;
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#160b0d;
+    color:#ff586b;
+    border-radius:9px;
+}
+
+.fileInfo{
+    flex:1;
+    min-width:0;
+}
+
+.fileName{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.fileMeta{
+    color:#52695b;
+    font-size:10px;
+    margin-top:4px;
+}
+
+.fileAction{
+    background:transparent;
+    border:0;
+    color:#789084;
+    padding:8px;
+}
+
+.fileAction:hover{
+    color:var(--green);
+}
+
+/* ================= MODALS ================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.82);
+    backdrop-filter:blur(10px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+    padding:20px;
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modalBox{
+    width:100%;
+    max-width:650px;
+    max-height:90vh;
+    overflow:auto;
+    background:#07100b;
+    border:1px solid rgba(0,255,156,.25);
+    border-radius:18px;
+    padding:22px;
+}
+
+.modalHead{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.close{
+    background:transparent;
+    border:0;
+    color:#73897c;
+    font-size:22px;
+}
+
+.viewer img{
+    width:100%;
+    max-height:70vh;
+    object-fit:contain;
+    border-radius:10px;
+}
+
+.setting{
+    padding:16px 0;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+}
+
+.settingInfo strong{
+    display:block;
+}
+
+.settingInfo small{
+    display:block;
+    color:#61786a;
+    margin-top:5px;
+}
+
+.switch{
+    width:46px;
+    height:25px;
+    border-radius:20px;
+    background:#1b2a21;
+    position:relative;
+    border:0;
+}
+
+.switch.on{
+    background:var(--green2);
+}
+
+.switch span{
+    width:19px;
+    height:19px;
+    background:white;
+    border-radius:50%;
+    position:absolute;
+    top:3px;
+    left:3px;
+    transition:.2s;
+}
+
+.switch.on span{
+    left:24px;
+}
+
+/* ================= PDF ================= */
+
+.pdfPreview{
+    height:450px;
+    background:white;
+    border-radius:8px;
+}
+
+.pdfPreview iframe{
+    width:100%;
+    height:100%;
+    border:0;
+    border-radius:8px;
+}
+
+/* ================= TOAST ================= */
+
+.toast{
+    position:fixed;
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%) translateY(100px);
+    background:#08140d;
+    border:1px solid var(--green);
+    color:var(--green);
+    padding:12px 18px;
+    border-radius:10px;
+    font-size:12px;
+    z-index:300;
+    transition:.3s;
+}
+
+.toast.show{
+    transform:translateX(-50%) translateY(0);
+}
+
+/* ================= MOBILE ================= */
+
+.mobileNav{
+    display:none;
+}
+
+@media(max-width:900px){
+
+    .sidebar{
+        display:none;
+    }
+
+    .layout{
+        display:block;
+    }
+
+    .main{
+        padding:18px 13px 90px;
+    }
+
+    .cards{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .gallery{
+        grid-template-columns:repeat(3,1fr);
+        gap:4px;
+    }
+
+    .mobileNav{
+        position:fixed;
+        bottom:0;
+        left:0;
+        right:0;
+        height:65px;
+        background:#06100a;
+        border-top:1px solid rgba(0,255,156,.18);
+        display:flex;
+        justify-content:space-around;
+        z-index:80;
+    }
+
+    .mobileNav button{
+        border:0;
+        background:transparent;
+        color:#668073;
+        font-size:10px;
+    }
+
+    .mobileNav button.active{
+        color:var(--green);
+    }
+
+    .topbar{
+        padding:0 14px;
+    }
+
+    .brand{
+        font-size:13px;
+    }
+
+    .lockBox{
+        padding:22px;
+    }
+
+    .word{
+        min-height:100px;
+    }
+
+    .chinese{
+        font-size:26px;
     }
 }
 
-@keyframes nameAppear {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
+@keyframes correctMove{
+    0%{transform:scale(1)}
+    50%{transform:scale(1.08)}
+    100%{transform:scale(1)}
+}
+
+@keyframes shake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-7px)}
+    75%{transform:translateX(7px)}
+}
+
+@keyframes signature{
+    from{
+        opacity:0;
+        transform:translateY(10px);
     }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    to{
+        opacity:1;
+        transform:translateY(0);
     }
 }
-
-@keyframes harshaAppear {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-
-/* =========================
-   VAULT
-========================= */
-
-#vaultScreen {
-    min-height: 100vh;
-}
-
-header {
-    padding: 18px 22px;
-    border-bottom: 1px solid #183d22;
-    background: rgba(3,10,5,0.95);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-}
-
-header h1 {
-    margin: 0;
-    font-size: 20px;
-}
-
-.secureStatus {
-    color: #4cff75;
-    font-size: 12px;
-}
-
-.container {
-    width: 100%;
-    max-width: 1050px;
-    margin: auto;
-    padding: 25px 20px 60px;
-}
-
-.welcome {
-    margin-bottom: 25px;
-}
-
-.welcome h2 {
-    margin-bottom: 5px;
-}
-
-.welcome p {
-    color: #718c77;
-}
-
-
-/* =========================
-   VAULT CARDS
-========================= */
-
-.grid {
-    display: grid;
-    grid-template-columns:
-        repeat(auto-fit, minmax(145px, 1fr));
-    gap: 14px;
-}
-
-.card {
-    background: #07130a;
-    border: 1px solid #183d22;
-    border-radius: 18px;
-    padding: 25px 15px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.25s;
-}
-
-.card:hover {
-    border-color: #35ff68;
-    transform: translateY(-4px);
-    box-shadow:
-        0 10px 30px rgba(0,255,80,0.08);
-}
-
-.icon {
-    font-size: 38px;
-    margin-bottom: 12px;
-}
-
-.card h3 {
-    margin: 5px 0;
-}
-
-.card p {
-    margin: 0;
-    color: #67816d;
-    font-size: 12px;
-}
-
-
-/* =========================
-   SECTIONS
-========================= */
-
-.section {
-    margin-top: 25px;
-    background: #061009;
-    border: 1px solid #173a20;
-    padding: 20px;
-    border-radius: 18px;
-}
-
-.back {
-    background: transparent;
-    border: 1px solid #254b2d;
-    color: #91aa95;
-    padding: 9px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-bottom: 18px;
-}
-
-.item {
-    background: #0a180d;
-    border: 1px solid #173b20;
-    padding: 15px;
-    margin: 9px 0;
-    border-radius: 12px;
-}
-
-
-/* =========================
-   PHOTO GALLERY
-========================= */
-
-.galleryHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.gallery {
-    display: grid;
-    grid-template-columns:
-        repeat(3, 1fr);
-    gap: 4px;
-    margin-top: 15px;
-}
-
-.photo {
-    aspect-ratio: 1 / 1;
-    background:
-        linear-gradient(
-            135deg,
-            #0d2413,
-            #122f19
-        );
-    border: 1px solid #183d22;
-    cursor: pointer;
-    overflow: hidden;
-    position: relative;
-}
-
-.photo::after {
-    content: "PHOTO";
-    position: absolute;
-    bottom: 7px;
-    left: 7px;
-    font-size: 8px;
-    letter-spacing: 2px;
-    color: #72a17b;
-}
-
-.photo:hover {
-    border-color: #35ff68;
-}
-
-
-/* =========================
-   FULLSCREEN PHOTO VIEW
-========================= */
-
-#photoViewer {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.96);
-    z-index: 80;
-    display: none;
-    align-items: center;
-    justify-content: center;
-}
-
-.viewerBox {
-    width: 90%;
-    max-width: 700px;
-    aspect-ratio: 4 / 3;
-    background: #071009;
-    border: 1px solid #35ff68;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.viewerText {
-    color: #568060;
-    letter-spacing: 3px;
-}
-
-.closeViewer {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: transparent;
-    color: white;
-    border: 1px solid #315a38;
-    border-radius: 7px;
-    padding: 7px 10px;
-    cursor: pointer;
-}
-
-
-/* =========================
-   LOCK BUTTON
-========================= */
-
-.lockButton {
-    background: transparent;
-    border: 1px solid #4d2222;
-    color: #d99a9a;
-    padding: 9px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.lockButton:hover {
-    border-color: #ff5555;
-}
-
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 600px) {
-
-    .lockBox {
-        padding: 28px 15px;
-    }
-
-    .logoGrid {
-        width: 250px;
-    }
-
-    .logoTile {
-        height: 105px;
-        font-size: 25px;
-    }
-
-    .harshaText {
-        font-size: 55px;
-    }
-
-    .chineseName {
-        font-size: 25px;
-    }
-
-    header {
-        padding: 15px;
-    }
-
-    header h1 {
-        font-size: 17px;
-    }
-
-}
-
 </style>
 </head>
 
-
 <body>
 
-
-<!-- =====================================================
-     LOCK SCREEN
-===================================================== -->
+<!-- ========================================================= -->
+<!-- LOCK SCREEN -->
+<!-- ========================================================= -->
 
 <div id="lockScreen">
 
-    <div class="lockBox">
-
-        <div class="systemText">
-            PRIVATE SYSTEM // VAULT 29
-        </div>
-
-        <h1 class="lockTitle">
-            🔐 PRIVATE VAULT
-        </h1>
-
-        <p class="lockSubtitle">
-            Pattern authentication required
-        </p>
-
-
-        <!-- =========================
-             CHALLENGE 1
-        ========================== -->
-
-        <div id="challenge1">
-
-            <div class="challengeTitle">
-                CHALLENGE 01
-            </div>
-
-            <div class="challengeInfo">
-                Select the correct movement sequence
-            </div>
-
-
-            <div class="logoGrid" id="grid1">
-
-                <button class="logoTile"
-                    data-id="1"
-                    onclick="selectTile(1)">
-
-                    <span class="tileNumber">
-                        01
-                    </span>
-
-                    <span class="tileChinese">
-                        阿克
-                    </span>
-
-                </button>
-
-
-                <button class="logoTile"
-                    data-id="2"
-                    onclick="selectTile(2)">
-
-                    <span class="tileNumber">
-                        02
-                    </span>
-
-                    <span class="tileChinese">
-                        沙雅
-                    </span>
-
-                </button>
-
-
-                <button class="logoTile"
-                    data-id="3"
-                    onclick="selectTile(3)">
-
-                    <span class="tileNumber">
-                        03
-                    </span>
-
-                    <span class="tileChinese">
-                        青影
-                    </span>
-
-                </button>
-
-
-                <button class="logoTile"
-                    data-id="4"
-                    onclick="selectTile(4)">
-
-                    <span class="tileNumber">
-                        04
-                    </span>
-
-                    <span class="tileChinese">
-                        龙门
-                    </span>
-
-                </button>
-
-            </div>
-
-
-            <div class="moveHint">
-                Move the correct tiles in sequence
-            </div>
-
-        </div>
-
-
-        <!-- =========================
-             CHALLENGE 2
-        ========================== -->
-
-        <div id="challenge2" class="hidden">
-
-            <div class="challengeTitle">
-                CHALLENGE 02
-            </div>
-
-            <div class="challengeInfo">
-                Second authentication sequence
-            </div>
-
-
-            <div class="logoGrid" id="grid2">
-
-                <button class="logoTile"
-                    data-id="1"
-                    onclick="selectTile2(1)">
-
-                    <span class="tileNumber">
-                        01
-                    </span>
-
-                    <span class="tileChinese">
-                        阿克
-                    </span>
-
-                </button>
-
-
-                <button class="logoTile"
-                    data-id="2"
-                    onclick="selectTile2(2)">
-
-                    <span class="tileNumber">
-                        02
-                    </span>
-
-                    <span class="tileChinese">
-                        沙雅
-                    </span>
-
-                </button>
-
-
-                <button class="logoTile"
-                    data-id="3"
-                    onclick="selectTile2(3)">
-
-                    <span class="tileNumber">
-                        03
-                    </span>
-
-                    <span class="tileChinese">
-                        哈尔
-                    </span>
-
-                </button>
-
-
-                <button class="logoTile"
-                    data-id="4"
-                    onclick="selectTile2(4)">
-
-                    <span class="tileNumber">
-                        04
-                    </span>
-
-                    <span class="tileChinese">
-                        沙
-                    </span>
-
-                </button>
-
-            </div>
-
-
-            <div class="moveHint">
-                Continue the second sequence
-            </div>
-
-        </div>
-
-
-        <div id="challengeStatus"></div>
-
-
-        <button
-            class="resetButton"
-            onclick="resetPuzzle()">
-
-            ↻ Reset
-
-        </button>
-
-    </div>
+<div class="lockBox">
+
+<div class="logo">🔐 HARSHA VAULT 29</div>
+<div class="logoSmall">PRIVATE CLOUD STORAGE</div>
+
+<div class="status" id="systemStatus">
+SYSTEM: WAITING FOR AUTHENTICATION...
+</div>
+
+<!-- CHALLENGE 1 -->
+
+<div id="challenge1" class="challenge active">
+
+<div class="challengeTitle">CHALLENGE 01 / 02</div>
+
+<div class="challengeInfo">
+Drag or slide the correct words.<br>
+Sequence: move <b>1 → 2</b>, then <b>2 → 4</b>.
+</div>
+
+<div class="wordGrid" id="grid1">
+
+<div class="word" data-id="1" data-value="AK">
+<span class="wordNumber">01</span>
+<span class="chinese">阿克</span>
+<span class="phonetic">AK</span>
+</div>
+
+<div class="word" data-id="2" data-value="SHAYA">
+<span class="wordNumber">02</span>
+<span class="chinese">沙雅</span>
+<span class="phonetic">SHAYA</span>
+</div>
+
+<div class="word" data-id="3" data-value="X">
+<span class="wordNumber">03</span>
+<span class="chinese">青影</span>
+<span class="phonetic">X</span>
+</div>
+
+<div class="word" data-id="4" data-value="X">
+<span class="wordNumber">04</span>
+<span class="chinese">龙门</span>
+<span class="phonetic">X</span>
+</div>
+
+</div>
+
+<div class="progress">
+<span class="dot active"></span>
+<span class="dot"></span>
+<span class="dot"></span>
+</div>
 
 </div>
 
 
-<!-- =====================================================
-     SUCCESS SCREEN
-===================================================== -->
+<!-- CHALLENGE 2 -->
 
-<div id="successScreen" class="hidden">
+<div id="challenge2" class="challenge">
 
-    <div class="authText">
-        AUTHENTICATION VERIFIED
-    </div>
+<div class="challengeTitle">CHALLENGE 02 / 02</div>
 
-    <div class="chineseName">
-        阿克沙雅·哈尔沙
-    </div>
+<div class="challengeInfo">
+Continue the sequence.<br>
+Move <b>3 → 4</b>, then <b>4 → 2</b>.
+</div>
 
-    <div class="harshaText">
-        harsha29
-    </div>
+<div class="wordGrid" id="grid2">
 
-    <div class="openingText">
-        VAULT OPENING...
-    </div>
+<div class="word" data-id="1" data-value="X">
+<span class="wordNumber">01</span>
+<span class="chinese">玄影</span>
+<span class="phonetic">X</span>
+</div>
+
+<div class="word" data-id="2" data-value="X">
+<span class="wordNumber">02</span>
+<span class="chinese">青门</span>
+<span class="phonetic">X</span>
+</div>
+
+<div class="word" data-id="3" data-value="HAR">
+<span class="wordNumber">03</span>
+<span class="chinese">哈尔</span>
+<span class="phonetic">HAR</span>
+</div>
+
+<div class="word" data-id="4" data-value="SHA">
+<span class="wordNumber">04</span>
+<span class="chinese">沙</span>
+<span class="phonetic">SHA</span>
+</div>
+
+</div>
+
+<div class="progress">
+<span class="dot active"></span>
+<span class="dot active"></span>
+<span class="dot"></span>
+</div>
 
 </div>
 
 
-<!-- =====================================================
-     VAULT
-===================================================== -->
+<!-- SUCCESS -->
 
-<div id="vaultScreen" class="hidden">
+<div id="success" class="success">
 
-    <header>
+<div class="successIcon">✓</div>
 
-        <h1>
-            🔐 Harsha Vault 29
-        </h1>
+<div class="successTitle">
+AUTHENTICATION VERIFIED
+</div>
 
-        <div style="display:flex;gap:12px;align-items:center;">
+<div class="chineseName">
+阿克沙雅·哈尔沙
+</div>
 
-            <span class="secureStatus">
-                ● SECURE MODE
-            </span>
+<div class="signature">
+harsha29
+</div>
 
-            <button
-                class="lockButton"
-                onclick="lockVault()">
-
-                🔒 Lock
-
-            </button>
-
-        </div>
-
-    </header>
-
-
-    <div class="container">
-
-
-        <div class="welcome">
-
-            <h2>
-                Welcome to your Vault
-            </h2>
-
-            <p>
-                Your private digital space.
-            </p>
-
-        </div>
-
-
-        <!-- =========================
-             MAIN CATEGORIES
-        ========================== -->
-
-        <div class="grid">
-
-
-            <div
-                class="card"
-                onclick="openSection('folders')">
-
-                <div class="icon">
-                    📁
-                </div>
-
-                <h3>
-                    Folders
-                </h3>
-
-                <p>
-                    Organize everything
-                </p>
-
-            </div>
-
-
-            <div
-                class="card"
-                onclick="openSection('files')">
-
-                <div class="icon">
-                    📄
-                </div>
-
-                <h3>
-                    Files
-                </h3>
-
-                <p>
-                    Private documents
-                </p>
-
-            </div>
-
-
-            <div
-                class="card"
-                onclick="openPhotos()">
-
-                <div class="icon">
-                    🖼️
-                </div>
-
-                <h3>
-                    Photos
-                </h3>
-
-                <p>
-                    Gallery
-                </p>
-
-            </div>
-
-
-            <div
-                class="card"
-                onclick="openSection('pdfs')">
-
-                <div class="icon">
-                    📑
-                </div>
-
-                <h3>
-                    PDFs
-                </h3>
-
-                <p>
-                    Documents
-                </p>
-
-            </div>
-
-
-            <div
-                class="card"
-                onclick="openSection('contacts')">
-
-                <div class="icon">
-                    👤
-                </div>
-
-                <h3>
-                    Contacts
-                </h3>
-
-                <p>
-                    Private contacts
-                </p>
-
-            </div>
-
-
-            <div
-                class="card"
-                onclick="openSection('notes')">
-
-                <div class="icon">
-                    📝
-                </div>
-
-                <h3>
-                    Notes
-                </h3>
-
-                <p>
-                    Personal notes
-                </p>
-
-            </div>
-
-
-        </div>
-
-
-        <!-- =========================
-             FOLDERS
-        ========================== -->
-
-        <div
-            id="folders"
-            class="section hidden">
-
-            <button
-                class="back"
-                onclick="closeSections()">
-
-                ← Back
-
-            </button>
-
-            <h2>
-                📁 Folders
-            </h2>
-
-            <div class="item">
-                📁 Personal
-            </div>
-
-            <div class="item">
-                📁 Projects
-            </div>
-
-            <div class="item">
-                📁 Important
-            </div>
-
-        </div>
-
-
-        <!-- =========================
-             FILES
-        ========================== -->
-
-        <div
-            id="files"
-            class="section hidden">
-
-            <button
-                class="back"
-                onclick="closeSections()">
-
-                ← Back
-
-            </button>
-
-            <h2>
-                📄 Files
-            </h2>
-
-            <div class="item">
-                No files uploaded yet.
-            </div>
-
-        </div>
-
-
-        <!-- =========================
-             PDFs
-        ========================== -->
-
-        <div
-            id="pdfs"
-            class="section hidden">
-
-            <button
-                class="back"
-                onclick="closeSections()">
-
-                ← Back
-
-            </button>
-
-            <h2>
-                📑 PDFs
-            </h2>
-
-            <div class="item">
-                No PDFs uploaded yet.
-            </div>
-
-        </div>
-
-
-        <!-- =========================
-             CONTACTS
-        ========================== -->
-
-        <div
-            id="contacts"
-            class="section hidden">
-
-            <button
-                class="back"
-                onclick="closeSections()">
-
-                ← Back
-
-            </button>
-
-            <h2>
-                👤 Contacts
-            </h2>
-
-            <div class="item">
-                No contacts saved yet.
-            </div>
-
-        </div>
-
-
-        <!-- =========================
-             NOTES
-        ========================== -->
-
-        <div
-            id="notes"
-            class="section hidden">
-
-            <button
-                class="back"
-                onclick="closeSections()">
-
-                ← Back
-
-            </button>
-
-            <h2>
-                📝 Notes
-            </h2>
-
-            <div class="item">
-                No notes created yet.
-            </div>
-
-        </div>
-
-
-        <!-- =========================
-             PHOTOS
-        ========================== -->
-
-        <div
-            id="photos"
-            class="section hidden">
-
-            <div class="galleryHeader">
-
-                <h2>
-                    🖼️ Photos
-                </h2>
-
-                <button
-                    class="back"
-                    onclick="closeSections()">
-
-                    ← Back
-
-                </button>
-
-            </div>
-
-
-            <div class="gallery">
-
-
-                <div
-                    class="photo"
-                    onclick="viewPhoto()">
-                </div>
-
-
-                <div
-                    class="photo"
-                    onclick="viewPhoto()">
-                </div>
-
-
-                <div
-                    class="photo"
-                    onclick="viewPhoto()">
-                </div>
-
-
-                <div
-                    class="photo"
-                    onclick="viewPhoto()">
-                </div>
-
-
-                <div
-                    class="photo"
-                    onclick="viewPhoto()">
-                </div>
-
-
-                <div
-                    class="photo"
-                    onclick="viewPhoto()">
-                </div>
-
-
-            </div>
-
-        </div>
-
-    </div>
+<div class="opening">
+VAULT OPENING...
+</div>
 
 </div>
 
 
-<!-- =====================================================
-     PHOTO VIEWER
-===================================================== -->
-
-<div id="photoViewer">
-
-    <div class="viewerBox">
-
-        <button
-            class="closeViewer"
-            onclick="closePhoto()">
-
-            ✕
-
-        </button>
-
-        <div class="viewerText">
-            PHOTO PREVIEW
-        </div>
-
-    </div>
+<button class="resetBtn" onclick="resetPuzzle()">
+RESET AUTHENTICATION
+</button>
 
 </div>
+</div>
+
+
+<!-- ========================================================= -->
+<!-- VAULT -->
+<!-- ========================================================= -->
+
+<div id="vault">
+
+<header class="topbar">
+
+<div class="brand">
+🔐 HARSHA VAULT 29
+<span>PRIVATE CLOUD STORAGE</span>
+</div>
+
+<div class="topActions">
+<button class="iconBtn" onclick="openSettings()">⚙</button>
+<button class="iconBtn" onclick="lockVault()">🔒</button>
+</div>
+
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+
+<button class="navBtn active" onclick="showHome()">⌂ Home</button>
+<button class="navBtn" onclick="showPhotos()">▧ Photos</button>
+<button class="navBtn" onclick="showFiles()">▤ Files</button>
+<button class="navBtn" onclick="showPDFs()">▣ PDFs</button>
+<button class="navBtn" onclick="showPlaceholder('Contacts')">♙ Contacts</button>
+<button class="navBtn" onclick="showPlaceholder('Notes')">▤ Notes</button>
+<button class="navBtn" onclick="openSettings()">⚙ Settings</button>
+
+<div class="storageMini">
+<div class="storageText" id="storageText">
+Storage: calculating...
+</div>
+
+<div class="storageBar">
+<div class="storageFill" id="storageFill"></div>
+</div>
+
+<button class="lockVault" onclick="lockVault()">
+🔒 Lock Vault
+</button>
+</div>
+
+</aside>
+
+
+<main class="main">
+
+<div class="welcome">
+<h1 id="pageTitle">Welcome back, Harsha</h1>
+<p id="pageSubtitle">
+Your private cloud space.
+</p>
+</div>
+
+
+<!-- HOME -->
+
+<div id="homePage">
+
+<div class="cards">
+
+<div class="card" onclick="showPhotos()">
+<div class="cardIcon">📸</div>
+<div class="cardName">Photos</div>
+<div class="cardCount" id="photoCount">0 photos</div>
+</div>
+
+<div class="card" onclick="showFiles()">
+<div class="cardIcon">📁</div>
+<div class="cardName">Files</div>
+<div class="cardCount">Cloud storage</div>
+</div>
+
+<div class="card" onclick="showPDFs()">
+<div class="cardIcon">📄</div>
+<div class="cardName">PDFs</div>
+<div class="cardCount" id="pdfCount">0 PDFs</div>
+</div>
+
+<div class="card" onclick="showPlaceholder('Contacts')">
+<div class="cardIcon">👤</div>
+<div class="cardName">Contacts</div>
+<div class="cardCount">Private</div>
+</div>
+
+<div class="card" onclick="showPlaceholder('Notes')">
+<div class="cardIcon">📝</div>
+<div class="cardName">Notes</div>
+<div class="cardCount">Private</div>
+</div>
+
+</div>
+
+<div class="section">
+
+<div class="sectionHead">
+<h2>Recent Photos</h2>
+<button class="addBtn" onclick="showPhotos()">View Gallery</button>
+</div>
+
+<div class="gallery" id="homeGallery">
+<div class="empty">No photos uploaded yet.</div>
+</div>
+
+</div>
+
+</div>
+
+
+<!-- PHOTOS -->
+
+<div id="photosPage" style="display:none">
+
+<div class="sectionHead">
+<h2>Photos</h2>
+
+<label class="addBtn">
+＋ Add Photos
+<input
+type="file"
+id="photoInput"
+accept="image/*"
+multiple
+hidden
+onchange="uploadPhotos(this.files)"
+>
+</label>
+
+</div>
+
+<div class="gallery" id="photoGallery">
+<div class="empty">Loading gallery...</div>
+</div>
+
+</div>
+
+
+<!-- FILES -->
+
+<div id="filesPage" style="display:none">
+
+<div class="sectionHead">
+<h2>Files</h2>
+
+<label class="addBtn">
+＋ Add Files
+<input
+type="file"
+id="fileInput"
+multiple
+hidden
+onchange="uploadFiles(this.files)"
+>
+</label>
+
+</div>
+
+<div class="fileList" id="fileList">
+<div class="empty">No files uploaded.</div>
+</div>
+
+</div>
+
+
+<!-- PDF -->
+
+<div id="pdfPage" style="display:none">
+
+<div class="sectionHead">
+<h2>PDF Documents</h2>
+
+<label class="addBtn">
+＋ Add PDF
+<input
+type="file"
+id="pdfInput"
+accept="application/pdf"
+multiple
+hidden
+onchange="uploadPDFs(this.files)"
+>
+</label>
+
+</div>
+
+<div class="fileList" id="pdfList">
+<div class="empty">No PDFs uploaded.</div>
+</div>
+
+</div>
+
+</main>
+</div>
+
+
+<div class="mobileNav">
+
+<button onclick="showHome()">⌂<br>Home</button>
+<button onclick="showPhotos()">▧<br>Photos</button>
+<button onclick="showFiles()">▤<br>Files</button>
+<button onclick="showPDFs()">▣<br>PDFs</button>
+<button onclick="openSettings()">⚙<br>More</button>
+
+</div>
+
+</div>
+
+
+<!-- PHOTO VIEWER -->
+
+<div class="modal" id="photoModal">
+
+<div class="modalBox viewer">
+
+<div class="modalHead">
+
+<strong id="photoViewerName">Photo</strong>
+
+<button class="close" onclick="closeModal('photoModal')">
+×
+</button>
+
+</div>
+
+<img id="photoViewerImage" src="">
+
+</div>
+</div>
+
+
+<!-- PDF VIEWER -->
+
+<div class="modal" id="pdfModal">
+
+<div class="modalBox">
+
+<div class="modalHead">
+
+<strong id="pdfViewerName">PDF</strong>
+
+<button class="close" onclick="closeModal('pdfModal')">
+×
+</button>
+
+</div>
+
+<div class="pdfPreview">
+<iframe id="pdfFrame"></iframe>
+</div>
+
+</div>
+</div>
+
+
+<!-- SETTINGS -->
+
+<div class="modal" id="settingsModal">
+
+<div class="modalBox">
+
+<div class="modalHead">
+
+<strong>⚙ Vault Settings</strong>
+
+<button class="close" onclick="closeModal('settingsModal')">
+×
+</button>
+
+</div>
+
+
+<div class="setting">
+
+<div class="settingInfo">
+<strong>Cyber Interface</strong>
+<small>Keep the dark neon interface enabled.</small>
+</div>
+
+<button class="switch on" onclick="toggleSwitch(this)">
+<span></span>
+</button>
+
+</div>
+
+
+<div class="setting">
+
+<div class="settingInfo">
+<strong>Gallery Preview</strong>
+<small>Show image thumbnails in the vault.</small>
+</div>
+
+<button class="switch on" onclick="toggleSwitch(this)">
+<span></span>
+</button>
+
+</div>
+
+
+<div class="setting">
+
+<div class="settingInfo">
+<strong>Confirm Before Delete</strong>
+<small>Ask before deleting cloud files.</small>
+</div>
+
+<button class="switch on" onclick="toggleSwitch(this)">
+<span></span>
+</button>
+
+</div>
+
+
+<div class="setting">
+
+<div class="settingInfo">
+<strong>Automatic Session</strong>
+<small>Keep the vault session on this device.</small>
+</div>
+
+<button class="switch on" onclick="toggleSwitch(this)">
+<span></span>
+</button>
+
+</div>
+
+
+<div class="setting">
+
+<div class="settingInfo">
+<strong>Storage</strong>
+<small>Supabase private cloud storage.</small>
+</div>
+
+<strong id="settingsStorage">
+Calculating...
+</strong>
+
+</div>
+
+
+<div class="setting">
+
+<div class="settingInfo">
+<strong>Security</strong>
+<small>Storage access is controlled by Supabase.</small>
+</div>
+
+<span>🔐</span>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="toast" id="toast"></div>
 
 
 <script>
 
-/* =====================================================
-   PUZZLE VARIABLES
-===================================================== */
+/* ============================================================
+   SUPABASE CONFIGURATION
+   ============================================================
 
-let challenge1Sequence = [];
-let challenge2Sequence = [];
+   Replace ONLY the value below with your Supabase
+   publishable/anon key.
 
+   Do NOT use a service_role key here.
+============================================================ */
 
-/* =====================================================
-   CHALLENGE 1
-   REQUIRED:
-   1 → 2
-   2 → 4
+const SUPABASE_URL =
+"https://wuvywetmzceyvfudplht.supabase.co";
 
-   Therefore:
-   [1,2]
-   then
-   [1,2,4]
-===================================================== */
+const SUPABASE_KEY =
+"PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE";
 
-function selectTile(id) {
-
-    challenge1Sequence.push(id);
-
-    const tiles =
-        document.querySelectorAll("#grid1 .logoTile");
-
-    tiles.forEach(tile => {
-
-        tile.classList.remove("selected");
-
-    });
-
-    const selected =
-        document.querySelector(
-            '#grid1 .logoTile[data-id="' + id + '"]'
-        );
-
-    if (selected) {
-        selected.classList.add("selected");
-    }
+const supabaseClient =
+supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
 
 
-    const current =
-        challenge1Sequence.join(",");
+/* ============================================================
+   GLOBAL
+============================================================ */
+
+let currentUser = null;
+
+const PHOTO_FOLDER = "photos";
+const PDF_FOLDER = "pdfs";
+const FILE_FOLDER = "files";
 
 
-    if (current === "1") {
+/* ============================================================
+   TOAST
+============================================================ */
 
-        setStatus(
-            "✓ First tile accepted"
-        );
+function toast(message){
 
-        return;
-    }
+    const el = document.getElementById("toast");
 
+    el.textContent = message;
+    el.classList.add("show");
 
-    if (current === "1,2") {
-
-        setStatus(
-            "✓ Second tile accepted"
-        );
-
-        return;
-    }
-
-
-    if (current === "1,2,4") {
-
-        setStatus(
-            "✓ CHALLENGE 01 VERIFIED"
-        );
-
-        setTimeout(() => {
-
-            startChallenge2();
-
-        }, 700);
-
-        return;
-    }
-
-
-    wrongMove();
-
+    setTimeout(()=>{
+        el.classList.remove("show");
+    },2500);
 }
 
 
-/* =====================================================
-   CHALLENGE 2
-   REQUIRED:
-   3 → 4
-   4 → 2
+/* ============================================================
+   CHINESE PUZZLE
+============================================================ */
 
-   Sequence:
-   3 → 4 → 2
-===================================================== */
+let selected = null;
 
-function selectTile2(id) {
+let challenge1Moves = [];
+let challenge2Moves = [];
 
-    challenge2Sequence.push(id);
-
-    const tiles =
-        document.querySelectorAll("#grid2 .logoTile");
-
-    tiles.forEach(tile => {
-
-        tile.classList.remove("selected");
-
-    });
-
-    const selected =
-        document.querySelector(
-            '#grid2 .logoTile[data-id="' + id + '"]'
-        );
-
-    if (selected) {
-        selected.classList.add("selected");
-    }
+let challenge1Done = false;
 
 
-    const current =
-        challenge2Sequence.join(",");
+/* ---------- word replacement ---------- */
 
+function replaceWord(word,newChinese,newPhonetic){
 
-    if (current === "3") {
+    word.querySelector(".chinese").textContent =
+        newChinese;
 
-        setStatus(
-            "✓ Third tile accepted"
-        );
-
-        return;
-    }
-
-
-    if (current === "3,4") {
-
-        setStatus(
-            "✓ Fourth tile accepted"
-        );
-
-        return;
-    }
-
-
-    if (current === "3,4,2") {
-
-        setStatus(
-            "✓ CHALLENGE 02 VERIFIED"
-        );
-
-        setTimeout(() => {
-
-            unlockVault();
-
-        }, 700);
-
-        return;
-    }
-
-
-    wrongMove();
-
+    word.querySelector(".phonetic").textContent =
+        newPhonetic || "X";
 }
 
 
-/* =====================================================
-   START CHALLENGE 2
-===================================================== */
+/* ---------- drag / touch ---------- */
 
-function startChallenge2() {
+function setupDragGrid(gridId,moveCallback){
 
-    challenge1Sequence = [];
+    const grid =
+        document.getElementById(gridId);
 
-    document
-        .getElementById("challenge1")
-        .classList.add("hidden");
+    const words =
+        grid.querySelectorAll(".word");
 
-    document
-        .getElementById("challenge2")
-        .classList.remove("hidden");
+    words.forEach(word=>{
 
-    setStatus(
-        "SECOND AUTHENTICATION REQUIRED"
-    );
+        word.addEventListener("pointerdown",(e)=>{
 
-}
+            e.preventDefault();
 
+            selected = word;
 
-/* =====================================================
-   WRONG MOVE
-===================================================== */
+            word.classList.add("dragging");
 
-function wrongMove() {
-
-    setStatus(
-        "✕ Incorrect sequence — reset"
-    );
-
-    setTimeout(() => {
-
-        resetPuzzle();
-
-    }, 700);
-
-}
-
-
-/* =====================================================
-   STATUS
-===================================================== */
-
-function setStatus(message) {
-
-    document
-        .getElementById("challengeStatus")
-        .textContent = message;
-
-}
-
-
-/* =====================================================
-   RESET
-===================================================== */
-
-function resetPuzzle() {
-
-    challenge1Sequence = [];
-    challenge2Sequence = [];
-
-    document
-        .getElementById("challenge1")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("challenge2")
-        .classList.add("hidden");
-
-
-    document
-        .querySelectorAll(".logoTile")
-        .forEach(tile => {
-
-            tile.classList.remove("selected");
+            try{
+                word.setPointerCapture(e.pointerId);
+            }catch(err){}
 
         });
 
 
-    setStatus(
-        "READY FOR AUTHENTICATION"
-    );
+        word.addEventListener("pointerup",(e)=>{
 
+            e.preventDefault();
+
+            if(!selected){
+                return;
+            }
+
+            const target =
+                document.elementFromPoint(
+                    e.clientX,
+                    e.clientY
+                )?.closest(".word");
+
+            selected.classList.remove("dragging");
+
+            if(
+                target &&
+                target.parentElement === grid &&
+                target !== selected
+            ){
+
+                const from =
+                    Number(selected.dataset.id);
+
+                const to =
+                    Number(target.dataset.id);
+
+                moveCallback(from,to,selected,target);
+            }
+
+            selected = null;
+        });
+
+    });
 }
 
 
-/* =====================================================
-   UNLOCK ANIMATION
-===================================================== */
+/* ============================================================
+   CHALLENGE 1
+============================================================ */
 
-function unlockVault() {
+function handleChallenge1(from,to,source,target){
+
+    const expected = [
+        [1,2],
+        [2,4]
+    ];
+
+    const current =
+        challenge1Moves.length;
+
+    if(
+        expected[current] &&
+        expected[current][0] === from &&
+        expected[current][1] === to
+    ){
+
+        challenge1Moves.push([from,to]);
+
+        source.classList.add("correct");
+
+        /* First word changes after moving 1 -> 2 */
+
+        if(from === 1 && to === 2){
+
+            replaceWord(
+                source,
+                "玄门",
+                "X"
+            );
+
+            replaceWord(
+                target,
+                "阿克",
+                "AK"
+            );
+
+            toast("FIRST WORD VERIFIED");
+
+        }
+
+
+        /* Second move */
+
+        if(from === 2 && to === 4){
+
+            replaceWord(
+                source,
+                "青影",
+                "X"
+            );
+
+            replaceWord(
+                target,
+                "沙雅",
+                "SHAYA"
+            );
+
+            challenge1Done = true;
+
+            toast("CHALLENGE 01 VERIFIED");
+
+            setTimeout(()=>{
+                startChallenge2();
+            },900);
+        }
+
+    }else{
+
+        source.classList.add("wrong");
+
+        target.classList.add("wrong");
+
+        setTimeout(()=>{
+
+            source.classList.remove("wrong");
+            target.classList.remove("wrong");
+
+        },400);
+
+        toast("WRONG MOVEMENT");
+
+        challenge1Moves = [];
+
+        resetChallenge1Visual();
+    }
+}
+
+
+/* ============================================================
+   RESET CHALLENGE 1 VISUAL
+============================================================ */
+
+function resetChallenge1Visual(){
+
+    const words =
+        document.querySelectorAll("#grid1 .word");
+
+    replaceWord(words[0],"阿克","AK");
+    replaceWord(words[1],"沙雅","SHAYA");
+    replaceWord(words[2],"青影","X");
+    replaceWord(words[3],"龙门","X");
+}
+
+
+/* ============================================================
+   CHALLENGE 2
+============================================================ */
+
+function startChallenge2(){
 
     document
-        .getElementById("lockScreen")
-        .classList.add("hidden");
+        .getElementById("challenge1")
+        .classList.remove("active");
 
-    const success =
-        document.getElementById("successScreen");
+    document
+        .getElementById("challenge2")
+        .classList.add("active");
 
-    success.classList.remove("hidden");
+    challenge2Moves = [];
+
+    const words =
+        document.querySelectorAll("#grid2 .word");
+
+    replaceWord(words[0],"玄影","X");
+    replaceWord(words[1],"青门","X");
+    replaceWord(words[2],"哈尔","HAR");
+    replaceWord(words[3],"沙","SHA");
+
+    document.getElementById("systemStatus")
+        .textContent =
+        "SYSTEM: CHALLENGE 01 VERIFIED / CONTINUE";
+}
 
 
-    setTimeout(() => {
+function handleChallenge2(from,to,source,target){
 
-        success.classList.add("hidden");
+    const expected = [
+        [3,4],
+        [4,2]
+    ];
+
+    const current =
+        challenge2Moves.length;
+
+    if(
+        expected[current] &&
+        expected[current][0] === from &&
+        expected[current][1] === to
+    ){
+
+        challenge2Moves.push([from,to]);
+
+        source.classList.add("correct");
+
+        /* HAR moves to SHA */
+
+        if(from === 3 && to === 4){
+
+            replaceWord(
+                source,
+                "玄影",
+                "X"
+            );
+
+            replaceWord(
+                target,
+                "哈尔",
+                "HAR"
+            );
+
+            toast("HAR VERIFIED");
+        }
+
+
+        /* SHA moves to second */
+
+        if(from === 4 && to === 2){
+
+            replaceWord(
+                source,
+                "青影",
+                "X"
+            );
+
+            replaceWord(
+                target,
+                "沙",
+                "SHA"
+            );
+
+            toast("SHA VERIFIED");
+
+            setTimeout(unlockVault,1000);
+        }
+
+    }else{
+
+        source.classList.add("wrong");
+        target.classList.add("wrong");
+
+        setTimeout(()=>{
+
+            source.classList.remove("wrong");
+            target.classList.remove("wrong");
+
+        },400);
+
+        toast("WRONG MOVEMENT");
+
+        challenge2Moves = [];
+    }
+}
+
+
+/* ============================================================
+   PUZZLE SETUP
+============================================================ */
+
+setupDragGrid(
+    "grid1",
+    handleChallenge1
+);
+
+setupDragGrid(
+    "grid2",
+    handleChallenge2
+);
+
+
+/* ============================================================
+   RESET
+============================================================ */
+
+function resetPuzzle(){
+
+    challenge1Moves = [];
+    challenge2Moves = [];
+
+    challenge1Done = false;
+
+    document
+        .getElementById("challenge1")
+        .classList.add("active");
+
+    document
+        .getElementById("challenge2")
+        .classList.remove("active");
+
+    document
+        .getElementById("success")
+        .classList.remove("show");
+
+    resetChallenge1Visual();
+
+    document.getElementById("systemStatus")
+        .textContent =
+        "SYSTEM: WAITING FOR AUTHENTICATION...";
+}
+
+
+/* ============================================================
+   UNLOCK
+============================================================ */
+
+async function unlockVault(){
+
+    document
+        .getElementById("challenge2")
+        .classList.remove("active");
+
+    document
+        .getElementById("success")
+        .classList.add("show");
+
+    document.getElementById("systemStatus")
+        .textContent =
+        "SYSTEM: ACCESS VERIFIED";
+
+    setTimeout(async()=>{
 
         document
-            .getElementById("vaultScreen")
-            .classList.remove("hidden");
+            .getElementById("lockScreen")
+            .style.display="none";
 
-    }, 5200);
+        document
+            .getElementById("vault")
+            .style.display="block";
 
+        await startCloudSession();
+
+    },2200);
 }
 
 
-/* =====================================================
-   LOCK VAULT
-===================================================== */
+/* ============================================================
+   SUPABASE ANONYMOUS SESSION
+============================================================ */
 
-function lockVault() {
+async function startCloudSession(){
 
-    document
-        .getElementById("vaultScreen")
-        .classList.add("hidden");
+    if(
+        SUPABASE_KEY ===
+        "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
+    ){
 
-    document
-        .getElementById("successScreen")
-        .classList.add("hidden");
+        toast("Add your Supabase publishable key first.");
+        return;
+    }
 
-    document
-        .getElementById("lockScreen")
-        .classList.remove("hidden");
+    try{
 
-    resetPuzzle();
+        let result =
+            await supabaseClient.auth.getSession();
 
+        let session =
+            result.data.session;
+
+        if(!session){
+
+            const anon =
+                await supabaseClient.auth.signInAnonymously();
+
+            if(anon.error){
+                throw anon.error;
+            }
+
+            session =
+                anon.data.session;
+        }
+
+        currentUser =
+            session?.user || null;
+
+        toast("PRIVATE CLOUD CONNECTED");
+
+        await refreshAll();
+
+    }catch(error){
+
+        console.error(error);
+
+        toast(
+            "Cloud connection failed"
+        );
+    }
 }
 
 
-/* =====================================================
-   OPEN SECTION
-===================================================== */
+/* ============================================================
+   STORAGE PATH
+============================================================ */
 
-function openSection(id) {
+function userPath(folder,fileName){
 
-    closeSections();
+    if(!currentUser){
+        throw new Error("No cloud user.");
+    }
+
+    return (
+        currentUser.id +
+        "/" +
+        folder +
+        "/" +
+        Date.now() +
+        "_" +
+        fileName.replace(/[^a-zA-Z0-9._-]/g,"_")
+    );
+}
+
+
+/* ============================================================
+   PHOTO UPLOAD
+============================================================ */
+
+async function uploadPhotos(files){
+
+    if(!files || !files.length){
+        return;
+    }
+
+    if(!currentUser){
+        toast("Cloud session not ready.");
+        return;
+    }
+
+    for(const file of files){
+
+        if(!file.type.startsWith("image/")){
+            continue;
+        }
+
+        try{
+
+            const path =
+                userPath(
+                    PHOTO_FOLDER,
+                    file.name
+                );
+
+            const result =
+                await supabaseClient
+                .storage
+                .from("vault")
+                .upload(
+                    path,
+                    file,
+                    {
+                        cacheControl:"3600",
+                        upsert:false
+                    }
+                );
+
+            if(result.error){
+                throw result.error;
+            }
+
+        }catch(error){
+
+            console.error(error);
+
+            toast(
+                "Photo upload failed"
+            );
+        }
+    }
+
+    toast("Photos uploaded");
+
+    await refreshPhotos();
+    await updateStorageInfo();
+}
+
+
+/* ============================================================
+   PDF UPLOAD
+============================================================ */
+
+async function uploadPDFs(files){
+
+    if(!files || !files.length){
+        return;
+    }
+
+    for(const file of files){
+
+        if(file.type !== "application/pdf"){
+            continue;
+        }
+
+        try{
+
+            const path =
+                userPath(
+                    PDF_FOLDER,
+                    file.name
+                );
+
+            const result =
+                await supabaseClient
+                .storage
+                .from("vault")
+                .upload(
+                    path,
+                    file,
+                    {
+                        cacheControl:"3600",
+                        upsert:false
+                    }
+                );
+
+            if(result.error){
+                throw result.error;
+            }
+
+        }catch(error){
+
+            console.error(error);
+
+            toast(
+                "PDF upload failed"
+            );
+        }
+    }
+
+    toast("PDF uploaded");
+
+    await refreshPDFs();
+    await updateStorageInfo();
+}
+
+
+/* ============================================================
+   GENERAL FILE UPLOAD
+============================================================ */
+
+async function uploadFiles(files){
+
+    if(!files || !files.length){
+        return;
+    }
+
+    for(const file of files){
+
+        try{
+
+            const path =
+                userPath(
+                    FILE_FOLDER,
+                    file.name
+                );
+
+            const result =
+                await supabaseClient
+                .storage
+                .from("vault")
+                .upload(
+                    path,
+                    file
+                );
+
+            if(result.error){
+                throw result.error;
+            }
+
+        }catch(error){
+
+            console.error(error);
+
+            toast(
+                "File upload failed"
+            );
+        }
+    }
+
+    toast("Files uploaded");
+
+    await refreshFiles();
+    await updateStorageInfo();
+}
+
+
+/* ============================================================
+   LIST STORAGE
+============================================================ */
+
+async function listFolder(folder){
+
+    if(!currentUser){
+        return [];
+    }
+
+    const result =
+        await supabaseClient
+        .storage
+        .from("vault")
+        .list(
+            currentUser.id + "/" + folder,
+            {
+                limit:1000,
+                sortBy:{
+                    column:"created_at",
+                    order:"desc"
+                }
+            }
+        );
+
+    if(result.error){
+
+        console.error(result.error);
+
+        return [];
+    }
+
+    return result.data || [];
+}
+
+
+/* ============================================================
+   SIGNED URL
+============================================================ */
+
+async function getSignedURL(path){
+
+    const result =
+        await supabaseClient
+        .storage
+        .from("vault")
+        .createSignedUrl(
+            path,
+            3600
+        );
+
+    if(result.error){
+
+        console.error(result.error);
+
+        return null;
+    }
+
+    return result.data.signedUrl;
+}
+
+
+/* ============================================================
+   PHOTOS
+============================================================ */
+
+async function refreshPhotos(){
+
+    const files =
+        await listFolder(PHOTO_FOLDER);
+
+    const gallery =
+        document.getElementById("photoGallery");
+
+    const homeGallery =
+        document.getElementById("homeGallery");
+
+    document.getElementById("photoCount")
+        .textContent =
+        files.length + " photos";
+
+
+    if(!files.length){
+
+        gallery.innerHTML =
+            `<div class="empty">
+                📸<br><br>
+                Your private gallery is empty.
+            </div>`;
+
+        homeGallery.innerHTML =
+            `<div class="empty">
+                No photos uploaded yet.
+            </div>`;
+
+        return;
+    }
+
+
+    gallery.innerHTML="";
+    homeGallery.innerHTML="";
+
+
+    for(const file of files){
+
+        const path =
+            currentUser.id +
+            "/" +
+            PHOTO_FOLDER +
+            "/" +
+            file.name;
+
+        const url =
+            await getSignedURL(path);
+
+        if(!url){
+            continue;
+        }
+
+
+        const item =
+            document.createElement("div");
+
+        item.className="photo";
+
+        item.innerHTML =
+            `<img
+                src="${url}"
+                loading="lazy"
+                alt=""
+            >`;
+
+        item.onclick=()=>{
+            openPhoto(
+                url,
+                file.name
+            );
+        };
+
+        gallery.appendChild(item);
+
+
+        if(
+            homeGallery.children.length < 8
+        ){
+
+            const homeItem =
+                item.cloneNode(true);
+
+            homeItem.onclick=()=>{
+                openPhoto(
+                    url,
+                    file.name
+                );
+            };
+
+            homeGallery.appendChild(
+                homeItem
+            );
+        }
+    }
+}
+
+
+/* ============================================================
+   PDF LIST
+============================================================ */
+
+async function refreshPDFs(){
+
+    const files =
+        await listFolder(PDF_FOLDER);
+
+    const list =
+        document.getElementById("pdfList");
+
+    document.getElementById("pdfCount")
+        .textContent =
+        files.length + " PDFs";
+
+    list.innerHTML="";
+
+
+    if(!files.length){
+
+        list.innerHTML =
+            `<div class="empty">
+                📄<br><br>
+                No PDF documents yet.
+            </div>`;
+
+        return;
+    }
+
+
+    for(const file of files){
+
+        const path =
+            currentUser.id +
+            "/" +
+            PDF_FOLDER +
+            "/" +
+            file.name;
+
+        const url =
+            await getSignedURL(path);
+
+        const row =
+            document.createElement("div");
+
+        row.className="file";
+
+        row.innerHTML =
+            `
+            <div class="fileIcon">PDF</div>
+
+            <div class="fileInfo">
+
+                <div class="fileName">
+                    ${escapeHTML(file.name)}
+                </div>
+
+                <div class="fileMeta">
+                    Private cloud PDF
+                </div>
+
+            </div>
+
+            <button class="fileAction">
+                Open
+            </button>
+
+            <button class="fileAction">
+                Delete
+            </button>
+            `;
+
+
+        row.children[2].onclick=()=>{
+            openPDF(
+                url,
+                file.name
+            );
+        };
+
+
+        row.children[3].onclick=()=>{
+            deleteObject(
+                path,
+                "PDF deleted"
+            );
+        };
+
+
+        list.appendChild(row);
+    }
+}
+
+
+/* ============================================================
+   GENERAL FILE LIST
+============================================================ */
+
+async function refreshFiles(){
+
+    const files =
+        await listFolder(FILE_FOLDER);
+
+    const list =
+        document.getElementById("fileList");
+
+    list.innerHTML="";
+
+
+    if(!files.length){
+
+        list.innerHTML =
+            `<div class="empty">
+                📁<br><br>
+                No files yet.
+            </div>`;
+
+        return;
+    }
+
+
+    for(const file of files){
+
+        const path =
+            currentUser.id +
+            "/" +
+            FILE_FOLDER +
+            "/" +
+            file.name;
+
+        const url =
+            await getSignedURL(path);
+
+        const row =
+            document.createElement("div");
+
+        row.className="file";
+
+        row.innerHTML =
+            `
+            <div class="fileIcon">FILE</div>
+
+            <div class="fileInfo">
+
+                <div class="fileName">
+                    ${escapeHTML(file.name)}
+                </div>
+
+                <div class="fileMeta">
+                    Private cloud file
+                </div>
+
+            </div>
+
+            <a
+              class="fileAction"
+              href="${url}"
+              target="_blank"
+            >
+              Open
+            </a>
+
+            <button class="fileAction">
+                Delete
+            </button>
+            `;
+
+
+        row.children[3].onclick=()=>{
+            deleteObject(
+                path,
+                "File deleted"
+            );
+        };
+
+
+        list.appendChild(row);
+    }
+}
+
+
+/* ============================================================
+   DELETE
+============================================================ */
+
+async function deleteObject(path,message){
+
+    if(
+        !confirm(
+            "Delete this item permanently?"
+        )
+    ){
+        return;
+    }
+
+    const result =
+        await supabaseClient
+        .storage
+        .from("vault")
+        .remove([path]);
+
+    if(result.error){
+
+        console.error(result.error);
+
+        toast("Delete failed");
+
+        return;
+    }
+
+    toast(message);
+
+    await refreshAll();
+}
+
+
+/* ============================================================
+   STORAGE INFORMATION
+============================================================ */
+
+async function updateStorageInfo(){
+
+    const photoFiles =
+        await listFolder(PHOTO_FOLDER);
+
+    const pdfFiles =
+        await listFolder(PDF_FOLDER);
+
+    const otherFiles =
+        await listFolder(FILE_FOLDER);
+
+    let totalBytes = 0;
+
+    [
+        ...photoFiles,
+        ...pdfFiles,
+        ...otherFiles
+    ].forEach(file=>{
+
+        totalBytes +=
+            Number(
+                file.metadata?.size || 0
+            );
+    });
+
+
+    const mb =
+        totalBytes /
+        (1024*1024);
+
+    const text =
+        mb.toFixed(1) +
+        " MB used";
+
+    document.getElementById(
+        "storageText"
+    ).textContent =
+        text;
+
+    document.getElementById(
+        "settingsStorage"
+    ).textContent =
+        text;
+
+    /*
+       UI limit shown as 1 GB.
+       Change this number if your actual
+       storage plan is different.
+    */
+
+    const percent =
+        Math.min(
+            (mb / 1024) * 100,
+            100
+        );
+
+    document.getElementById(
+        "storageFill"
+    ).style.width =
+        percent + "%";
+}
+
+
+/* ============================================================
+   REFRESH EVERYTHING
+============================================================ */
+
+async function refreshAll(){
+
+    await refreshPhotos();
+
+    await refreshPDFs();
+
+    await refreshFiles();
+
+    await updateStorageInfo();
+}
+
+
+/* ============================================================
+   PHOTO VIEWER
+============================================================ */
+
+function openPhoto(url,name){
+
+    document.getElementById(
+        "photoViewerImage"
+    ).src=url;
+
+    document.getElementById(
+        "photoViewerName"
+    ).textContent=name;
+
+    document
+        .getElementById("photoModal")
+        .classList.add("show");
+}
+
+
+/* ============================================================
+   PDF VIEWER
+============================================================ */
+
+function openPDF(url,name){
+
+    document.getElementById(
+        "pdfViewerName"
+    ).textContent=name;
+
+    document.getElementById(
+        "pdfFrame"
+    ).src=url;
+
+    document
+        .getElementById("pdfModal")
+        .classList.add("show");
+}
+
+
+/* ============================================================
+   CLOSE MODAL
+============================================================ */
+
+function closeModal(id){
 
     document
         .getElementById(id)
-        .classList.remove("hidden");
-
+        .classList.remove("show");
 }
 
 
-/* =====================================================
-   PHOTOS
-===================================================== */
+/* ============================================================
+   SETTINGS
+============================================================ */
 
-function openPhotos() {
-
-    closeSections();
+function openSettings(){
 
     document
-        .getElementById("photos")
-        .classList.remove("hidden");
-
+        .getElementById("settingsModal")
+        .classList.add("show");
 }
 
 
-function viewPhoto() {
+function toggleSwitch(button){
 
-    document
-        .getElementById("photoViewer")
-        .style.display = "flex";
-
+    button.classList.toggle("on");
 }
 
 
-function closePhoto() {
+/* ============================================================
+   NAVIGATION
+============================================================ */
 
-    document
-        .getElementById("photoViewer")
-        .style.display = "none";
+function hidePages(){
 
+    document.getElementById("homePage")
+        .style.display="none";
+
+    document.getElementById("photosPage")
+        .style.display="none";
+
+    document.getElementById("filesPage")
+        .style.display="none";
+
+    document.getElementById("pdfPage")
+        .style.display="none";
 }
 
 
-/* =====================================================
-   CLOSE ALL SECTIONS
-===================================================== */
+function showHome(){
 
-function closeSections() {
+    hidePages();
 
-    const sections =
-        document.querySelectorAll(".section");
+    document.getElementById("homePage")
+        .style.display="block";
 
-    sections.forEach(section => {
+    document.getElementById("pageTitle")
+        .textContent="Welcome back, Harsha";
 
-        section.classList.add("hidden");
+    document.getElementById("pageSubtitle")
+        .textContent=
+        "Your private cloud space.";
+}
 
-    });
 
+function showPhotos(){
+
+    hidePages();
+
+    document.getElementById("photosPage")
+        .style.display="block";
+
+    document.getElementById("pageTitle")
+        .textContent="Photos";
+
+    document.getElementById("pageSubtitle")
+        .textContent=
+        "Your private mobile-style gallery.";
+
+    refreshPhotos();
+}
+
+
+function showFiles(){
+
+    hidePages();
+
+    document.getElementById("filesPage")
+        .style.display="block";
+
+    document.getElementById("pageTitle")
+        .textContent="Files";
+
+    document.getElementById("pageSubtitle")
+        .textContent=
+        "Your private cloud files.";
+
+    refreshFiles();
+}
+
+
+function showPDFs(){
+
+    hidePages();
+
+    document.getElementById("pdfPage")
+        .style.display="block";
+
+    document.getElementById("pageTitle")
+        .textContent="PDF Documents";
+
+    document.getElementById("pageSubtitle")
+        .textContent=
+        "Your private PDF library.";
+
+    refreshPDFs();
+}
+
+
+function showPlaceholder(name){
+
+    hidePages();
+
+    document.getElementById("pageTitle")
+        .textContent=name;
+
+    document.getElementById("pageSubtitle")
+        .textContent=
+        "This section is ready for the next module.";
+
+    toast(
+        name +
+        " module coming next"
+    );
+}
+
+
+/* ============================================================
+   LOCK
+============================================================ */
+
+function lockVault(){
+
+    document.getElementById("vault")
+        .style.display="none";
+
+    document.getElementById("lockScreen")
+        .style.display="flex";
+
+    resetPuzzle();
+
+    toast("Vault locked");
+}
+
+
+/* ============================================================
+   ESCAPE HTML
+============================================================ */
+
+function escapeHTML(text){
+
+    return String(text)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
 }
 
 </script>
