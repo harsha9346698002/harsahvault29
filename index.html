@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Harsha Vault 29</title>
+
+<title>Private Vault</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+
 *{
     box-sizing:border-box;
     margin:0;
@@ -15,259 +18,279 @@
 }
 
 :root{
-    --bg:#050807;
-    --panel:#09120e;
-    --panel2:#0c1812;
     --green:#00ff9c;
-    --green2:#00c978;
-    --text:#eafff4;
-    --muted:#729080;
-    --red:#ff4055;
-    --border:rgba(0,255,156,.28);
+    --green2:#00c878;
+    --bg:#020504;
+    --panel:#07100b;
+    --panel2:#0a1510;
+    --border:rgba(0,255,156,.25);
+    --muted:#61776b;
+    --red:#ff4357;
+}
+
+html,body{
+    width:100%;
+    min-height:100%;
+    background:var(--bg);
+    color:#eafff4;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
 body{
-    background:
-      radial-gradient(circle at 50% -10%,rgba(0,255,156,.10),transparent 35%),
-      var(--bg);
-    color:var(--text);
-    font-family:Arial,Helvetica,sans-serif;
-    min-height:100vh;
-}
-
-button,
-input{
-    font:inherit;
+    overflow-x:hidden;
 }
 
 button{
+    font-family:inherit;
     cursor:pointer;
 }
 
-/* ================= LOCK SCREEN ================= */
+
+/* =========================================================
+   AUTHENTICATION
+========================================================= */
 
 #lockScreen{
-    min-height:100vh;
+    position:fixed;
+    inset:0;
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(0,255,156,.07),
+            transparent 42%
+        ),
+        #020504;
+
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:20px;
+
+    z-index:1000;
 }
 
-.lockBox{
-    width:100%;
-    max-width:570px;
-    border:1px solid var(--border);
-    border-radius:24px;
-    padding:30px;
-    background:linear-gradient(145deg,#08120d,#030705);
-    box-shadow:
-      0 0 50px rgba(0,255,156,.08),
-      inset 0 0 30px rgba(0,255,156,.02);
+.lockArea{
+    width:min(560px,92vw);
 }
 
-.logo{
-    text-align:center;
-    color:var(--green);
-    font-weight:bold;
-    letter-spacing:4px;
-    font-size:21px;
-}
+.systemLight{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 15px var(--green);
 
-.logoSmall{
-    text-align:center;
-    color:var(--muted);
-    letter-spacing:3px;
-    font-size:10px;
-    margin-top:7px;
-}
-
-.status{
-    margin:24px 0;
-    border:1px solid rgba(0,255,156,.18);
-    background:#050b08;
-    padding:12px;
-    border-radius:10px;
-    font-family:monospace;
-    font-size:12px;
-    color:var(--green);
-}
-
-.challenge{
-    display:none;
-}
-
-.challenge.active{
-    display:block;
-}
-
-.challengeTitle{
-    color:var(--green);
-    font-size:13px;
-    letter-spacing:2px;
-    margin-bottom:8px;
-}
-
-.challengeInfo{
-    color:var(--muted);
-    font-size:12px;
-    margin-bottom:20px;
-    line-height:1.5;
+    margin:0 auto 35px;
 }
 
 .wordGrid{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:14px;
+    gap:15px;
 }
 
 .word{
-    position:relative;
-    min-height:115px;
-    border:1px solid rgba(0,255,156,.35);
-    background:linear-gradient(145deg,#0a1710,#06100b);
-    border-radius:16px;
+    height:125px;
+
+    border:1px solid rgba(0,255,156,.3);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(0,255,156,.04),
+            rgba(0,0,0,.3)
+        );
+
+    border-radius:18px;
+
     display:flex;
-    flex-direction:column;
     justify-content:center;
     align-items:center;
+
     user-select:none;
     touch-action:none;
-    transition:.25s;
+
+    transition:
+        transform .2s,
+        border .2s,
+        box-shadow .2s;
 }
 
 .word:hover{
     border-color:var(--green);
-    box-shadow:0 0 20px rgba(0,255,156,.12);
+
+    box-shadow:
+        0 0 25px rgba(0,255,156,.1);
 }
 
 .word.dragging{
-    transform:scale(1.05);
-    border-color:var(--green);
-    box-shadow:0 0 35px rgba(0,255,156,.30);
-    z-index:10;
-}
+    transform:scale(1.08);
 
-.word.target{
     border-color:var(--green);
-    box-shadow:0 0 25px rgba(0,255,156,.20);
+
+    box-shadow:
+        0 0 40px rgba(0,255,156,.25);
+
+    z-index:20;
 }
 
 .word.correct{
-    animation:correctMove .5s ease;
+    border-color:var(--green);
+
+    box-shadow:
+        0 0 30px rgba(0,255,156,.35);
+
+    animation:correctPulse .5s ease;
 }
 
 .word.wrong{
-    animation:shake .35s ease;
     border-color:var(--red);
+
+    animation:shake .35s ease;
 }
 
-.wordNumber{
-    position:absolute;
-    top:9px;
-    left:11px;
-    color:#426354;
-    font-size:10px;
+.chineseWord{
+    font-family:
+        "Noto Sans CJK SC",
+        "Microsoft YaHei",
+        "PingFang SC",
+        serif;
+
+    font-size:38px;
+
+    color:#eafff4;
+
+    transition:
+        opacity .2s,
+        transform .2s;
 }
 
-.chinese{
-    font-family:"Noto Sans CJK SC","Microsoft YaHei",serif;
-    font-size:30px;
-    font-weight:bold;
-}
-
-.phonetic{
-    margin-top:7px;
-    color:#4e7160;
-    font-size:9px;
-    letter-spacing:1px;
-}
-
-.progress{
-    margin-top:18px;
+.challengeDots{
     display:flex;
-    gap:7px;
     justify-content:center;
+    gap:8px;
+
+    margin-top:22px;
 }
 
 .dot{
     width:7px;
     height:7px;
+
     border-radius:50%;
-    background:#173326;
+
+    background:#193127;
 }
 
 .dot.active{
     background:var(--green);
-    box-shadow:0 0 8px var(--green);
+
+    box-shadow:
+        0 0 10px var(--green);
 }
 
-.resetBtn{
-    width:100%;
-    margin-top:20px;
-    padding:13px;
-    border-radius:10px;
-    border:1px solid rgba(255,255,255,.12);
-    background:#07100b;
-    color:#718a7c;
-}
 
-.resetBtn:hover{
-    color:white;
-    border-color:var(--green);
-}
+/* =========================================================
+   FINAL CHINESE ANIMATION
+========================================================= */
 
-.success{
+#nameAnimation{
+    position:fixed;
+    inset:0;
+
     display:none;
-    text-align:center;
-}
 
-.success.show{
-    display:block;
-}
-
-.successIcon{
-    width:70px;
-    height:70px;
-    margin:10px auto 20px;
-    border:2px solid var(--green);
-    border-radius:50%;
-    display:flex;
     align-items:center;
     justify-content:center;
+
+    background:#020504;
+
+    z-index:2000;
+
+    overflow:hidden;
+}
+
+#nameAnimation.show{
+    display:flex;
+}
+
+.animationWord{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    transform:
+        translate(-50%,-50%)
+        scale(.3);
+
+    opacity:0;
+
+    font-family:
+        "Noto Sans CJK SC",
+        "Microsoft YaHei",
+        serif;
+
+    font-size:clamp(38px,8vw,90px);
+
     color:var(--green);
-    font-size:34px;
-    box-shadow:0 0 35px rgba(0,255,156,.2);
+
+    text-shadow:
+        0 0 15px rgba(0,255,156,.5),
+        0 0 45px rgba(0,255,156,.2);
+
+    white-space:nowrap;
 }
 
-.successTitle{
-    color:var(--green);
-    letter-spacing:3px;
-    font-size:13px;
+.animationWord.appear{
+    animation:
+        chineseAppear
+        .75s
+        ease
+        forwards;
 }
 
-.chineseName{
-    margin-top:18px;
-    font-size:31px;
-    font-family:serif;
+#finalName{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    transform:
+        translate(-50%,-50%)
+        scale(.05);
+
+    opacity:0;
+
+    font-family:
+        "Noto Sans CJK SC",
+        "Microsoft YaHei",
+        serif;
+
+    font-size:clamp(35px,8vw,100px);
+
+    color:#fff;
+
+    white-space:nowrap;
+
+    text-shadow:
+        0 0 20px var(--green),
+        0 0 70px var(--green);
+
+    z-index:5;
 }
 
-.signature{
-    margin-top:10px;
-    font-family:cursive;
-    color:var(--green);
-    font-size:34px;
-    animation:signature .8s ease;
+#finalName.expand{
+    animation:
+        finalExpand
+        2.2s
+        cubic-bezier(.15,.75,.15,1)
+        forwards;
 }
 
-.opening{
-    margin-top:15px;
-    color:#668072;
-    font-family:monospace;
-    font-size:11px;
-}
 
-/* ================= APP ================= */
+/* =========================================================
+   VAULT
+========================================================= */
 
 #vault{
     display:none;
@@ -276,43 +299,59 @@ button{
 
 .topbar{
     height:65px;
-    border-bottom:1px solid rgba(0,255,156,.15);
+
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 25px;
-    background:rgba(3,8,5,.95);
+
+    padding:0 24px;
+
+    background:#050b07;
+
+    border-bottom:
+        1px solid rgba(0,255,156,.13);
+
     position:sticky;
     top:0;
+
     z-index:50;
 }
 
-.brand{
+.privateTitle{
     color:var(--green);
-    font-weight:bold;
+
+    font-size:13px;
+
     letter-spacing:3px;
 }
 
-.brand span{
-    display:block;
-    color:#4d6659;
+.privateStatus{
+    color:#50685b;
+
     font-size:8px;
+
     letter-spacing:2px;
-    margin-top:4px;
+
+    margin-top:5px;
 }
 
-.topActions{
+.topButtons{
     display:flex;
     gap:8px;
 }
 
-.iconBtn{
-    border:1px solid rgba(0,255,156,.22);
-    background:#08110c;
-    color:var(--green);
+.iconButton{
     width:40px;
     height:40px;
+
+    border:
+        1px solid rgba(0,255,156,.2);
+
     border-radius:10px;
+
+    background:#07110b;
+
+    color:var(--green);
 }
 
 .layout{
@@ -322,69 +361,104 @@ button{
 
 .sidebar{
     width:220px;
-    border-right:1px solid rgba(0,255,156,.13);
-    padding:22px 15px;
-    background:#060c08;
+
+    padding:20px 14px;
+
+    border-right:
+        1px solid rgba(0,255,156,.12);
+
+    background:#040906;
 }
 
-.navBtn{
+.navButton{
     width:100%;
-    padding:13px;
-    border:0;
-    background:transparent;
-    color:#6e8578;
-    text-align:left;
-    border-radius:10px;
+
+    padding:12px;
+
     margin-bottom:5px;
+
+    border:0;
+
+    border-radius:9px;
+
+    background:transparent;
+
+    color:#668073;
+
+    text-align:left;
 }
 
-.navBtn:hover,
-.navBtn.active{
-    background:rgba(0,255,156,.09);
+.navButton:hover,
+.navButton.active{
     color:var(--green);
+
+    background:
+        rgba(0,255,156,.07);
 }
 
-.storageMini{
-    margin-top:30px;
-    border-top:1px solid rgba(0,255,156,.12);
-    padding-top:20px;
+.storageBox{
+    margin-top:25px;
+
+    padding-top:18px;
+
+    border-top:
+        1px solid rgba(0,255,156,.1);
 }
 
 .storageText{
+    color:#647b6e;
+
     font-size:10px;
-    color:#62796c;
+
     margin-bottom:8px;
 }
 
 .storageBar{
     height:5px;
-    background:#17251d;
+
     border-radius:10px;
+
+    background:#17231c;
+
     overflow:hidden;
 }
 
 .storageFill{
-    width:0%;
     height:100%;
+
+    width:0%;
+
     background:var(--green);
+
+    box-shadow:
+        0 0 10px var(--green);
 }
 
-.lockVault{
-    margin-top:20px;
+.lockButton{
     width:100%;
-    border:1px solid rgba(255,64,85,.45);
-    color:#ff6575;
-    background:#13080b;
+
+    margin-top:20px;
+
     padding:11px;
-    border-radius:10px;
+
+    border:
+        1px solid rgba(255,67,87,.4);
+
+    border-radius:9px;
+
+    background:#12070a;
+
+    color:#ff6675;
 }
 
 .main{
     flex:1;
-    padding:28px;
-    max-width:1400px;
-    margin:auto;
+
     width:100%;
+
+    max-width:1400px;
+
+    padding:28px;
 }
 
 .welcome{
@@ -396,178 +470,280 @@ button{
 }
 
 .welcome p{
-    color:#667c70;
     margin-top:7px;
+
+    color:#62786b;
+
     font-size:13px;
 }
 
+
+/* =========================================================
+   DASHBOARD CARDS
+========================================================= */
+
 .cards{
     display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:13px;
+
+    grid-template-columns:
+        repeat(5,1fr);
+
+    gap:12px;
 }
 
 .card{
-    border:1px solid rgba(0,255,156,.17);
-    background:#08110c;
-    border-radius:15px;
     padding:18px;
+
+    border:
+        1px solid rgba(0,255,156,.15);
+
+    background:#07100b;
+
+    border-radius:15px;
+
     cursor:pointer;
+
     transition:.2s;
 }
 
 .card:hover{
     transform:translateY(-3px);
+
     border-color:var(--green);
 }
 
 .cardIcon{
-    font-size:25px;
+    font-size:24px;
 }
 
 .cardName{
-    margin-top:14px;
+    margin-top:13px;
+
     font-weight:bold;
 }
 
 .cardCount{
-    color:#61776a;
-    font-size:11px;
     margin-top:5px;
+
+    color:#61776b;
+
+    font-size:10px;
 }
+
+
+/* =========================================================
+   SECTIONS
+========================================================= */
 
 .section{
     margin-top:30px;
 }
 
-.sectionHead{
+.sectionHeader{
     display:flex;
-    justify-content:space-between;
+
     align-items:center;
+
+    justify-content:space-between;
+
     margin-bottom:15px;
 }
 
-.sectionHead h2{
-    font-size:17px;
+.sectionHeader h2{
+    font-size:18px;
 }
 
-.addBtn{
-    border:1px solid var(--green);
-    color:var(--green);
-    background:#06100a;
+.addButton{
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:9px 13px;
+
+    border:
+        1px solid var(--green);
+
     border-radius:9px;
-    padding:9px 14px;
+
+    background:#06100a;
+
+    color:var(--green);
+
+    cursor:pointer;
 }
 
-.addBtn:hover{
-    background:rgba(0,255,156,.1);
-}
 
-/* ================= PHOTO GALLERY ================= */
+/* =========================================================
+   MOBILE GALLERY
+========================================================= */
 
 .gallery{
     display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:7px;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:6px;
 }
 
 .photo{
+    position:relative;
+
     aspect-ratio:1/1;
-    border-radius:8px;
+
     overflow:hidden;
-    background:#0a1510;
-    border:1px solid rgba(0,255,156,.12);
+
+    border-radius:7px;
+
+    background:#09130e;
+
     cursor:pointer;
 }
 
 .photo img{
     width:100%;
     height:100%;
+
     object-fit:cover;
+
     transition:.25s;
 }
 
 .photo:hover img{
-    transform:scale(1.05);
+    transform:scale(1.06);
 }
 
-.empty{
-    padding:45px 20px;
-    border:1px dashed rgba(0,255,156,.18);
-    border-radius:14px;
-    text-align:center;
-    color:#536a5d;
-}
 
-/* ================= FILES ================= */
+/* =========================================================
+   FILES
+========================================================= */
 
 .fileList{
     display:flex;
+
     flex-direction:column;
+
     gap:8px;
 }
 
-.file{
+.fileRow{
     display:flex;
+
     align-items:center;
-    gap:14px;
-    padding:14px;
-    border:1px solid rgba(0,255,156,.13);
-    background:#08100b;
+
+    gap:12px;
+
+    padding:13px;
+
+    border:
+        1px solid rgba(0,255,156,.13);
+
+    background:#07100b;
+
     border-radius:11px;
 }
 
 .fileIcon{
     width:40px;
     height:40px;
+
     display:flex;
+
     align-items:center;
     justify-content:center;
-    background:#160b0d;
-    color:#ff586b;
+
     border-radius:9px;
+
+    background:#170b0d;
+
+    color:#ff586b;
+
+    font-size:10px;
+
+    font-weight:bold;
 }
 
 .fileInfo{
     flex:1;
+
     min-width:0;
 }
 
 .fileName{
-    white-space:nowrap;
     overflow:hidden;
+
     text-overflow:ellipsis;
+
+    white-space:nowrap;
 }
 
 .fileMeta{
-    color:#52695b;
-    font-size:10px;
     margin-top:4px;
+
+    color:#566c5f;
+
+    font-size:10px;
 }
 
 .fileAction{
-    background:transparent;
     border:0;
-    color:#789084;
-    padding:8px;
+
+    background:transparent;
+
+    color:#70877a;
+
+    padding:7px;
 }
 
 .fileAction:hover{
     color:var(--green);
 }
 
-/* ================= MODALS ================= */
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty{
+    padding:45px 20px;
+
+    border:
+        1px dashed rgba(0,255,156,.15);
+
+    border-radius:14px;
+
+    text-align:center;
+
+    color:#50665a;
+
+    grid-column:1/-1;
+}
+
+
+/* =========================================================
+   MODALS
+========================================================= */
 
 .modal{
     position:fixed;
+
     inset:0;
-    background:rgba(0,0,0,.82);
-    backdrop-filter:blur(10px);
+
     display:none;
+
     align-items:center;
     justify-content:center;
-    z-index:100;
+
     padding:20px;
+
+    background:
+        rgba(0,0,0,.85);
+
+    backdrop-filter:blur(10px);
+
+    z-index:500;
 }
 
 .modal.show{
@@ -575,43 +751,82 @@ button{
 }
 
 .modalBox{
-    width:100%;
-    max-width:650px;
+    width:min(700px,95vw);
+
     max-height:90vh;
+
     overflow:auto;
-    background:#07100b;
-    border:1px solid rgba(0,255,156,.25);
-    border-radius:18px;
+
     padding:22px;
+
+    background:#07100b;
+
+    border:
+        1px solid rgba(0,255,156,.25);
+
+    border-radius:18px;
 }
 
-.modalHead{
+.modalHeader{
     display:flex;
+
     justify-content:space-between;
+
     align-items:center;
-    margin-bottom:20px;
+
+    margin-bottom:18px;
 }
 
-.close{
-    background:transparent;
+.closeButton{
     border:0;
-    color:#73897c;
-    font-size:22px;
+
+    background:transparent;
+
+    color:#70867a;
+
+    font-size:23px;
 }
 
-.viewer img{
+.viewerImage{
     width:100%;
-    max-height:70vh;
+
+    max-height:75vh;
+
     object-fit:contain;
+
     border-radius:10px;
 }
 
-.setting{
-    padding:16px 0;
-    border-bottom:1px solid rgba(255,255,255,.06);
+.pdfFrame{
+    width:100%;
+
+    height:70vh;
+
+    border:0;
+
+    border-radius:8px;
+
+    background:white;
+}
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+.settingRow{
     display:flex;
+
     justify-content:space-between;
-    gap:20px;
+
+    align-items:center;
+
+    gap:15px;
+
+    padding:17px 0;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.06);
 }
 
 .settingInfo strong{
@@ -620,75 +835,90 @@ button{
 
 .settingInfo small{
     display:block;
-    color:#61786a;
+
     margin-top:5px;
+
+    color:#61786b;
 }
 
 .switch{
+    position:relative;
+
     width:46px;
     height:25px;
-    border-radius:20px;
-    background:#1b2a21;
-    position:relative;
+
     border:0;
+
+    border-radius:20px;
+
+    background:#1b2a21;
+}
+
+.switch span{
+    position:absolute;
+
+    top:3px;
+    left:3px;
+
+    width:19px;
+    height:19px;
+
+    border-radius:50%;
+
+    background:white;
+
+    transition:.2s;
 }
 
 .switch.on{
     background:var(--green2);
 }
 
-.switch span{
-    width:19px;
-    height:19px;
-    background:white;
-    border-radius:50%;
-    position:absolute;
-    top:3px;
-    left:3px;
-    transition:.2s;
-}
-
 .switch.on span{
     left:24px;
 }
 
-/* ================= PDF ================= */
 
-.pdfPreview{
-    height:450px;
-    background:white;
-    border-radius:8px;
-}
-
-.pdfPreview iframe{
-    width:100%;
-    height:100%;
-    border:0;
-    border-radius:8px;
-}
-
-/* ================= TOAST ================= */
+/* =========================================================
+   TOAST
+========================================================= */
 
 .toast{
     position:fixed;
-    bottom:25px;
+
     left:50%;
-    transform:translateX(-50%) translateY(100px);
-    background:#08140d;
-    border:1px solid var(--green);
-    color:var(--green);
+    bottom:25px;
+
+    transform:
+        translate(-50%,120px);
+
     padding:12px 18px;
+
+    border:
+        1px solid var(--green);
+
     border-radius:10px;
+
+    background:#07130c;
+
+    color:var(--green);
+
     font-size:12px;
-    z-index:300;
+
+    z-index:5000;
+
     transition:.3s;
 }
 
 .toast.show{
-    transform:translateX(-50%) translateY(0);
+    transform:
+        translate(-50%,0);
 }
 
-/* ================= MOBILE ================= */
+
+/* =========================================================
+   MOBILE
+========================================================= */
 
 .mobileNav{
     display:none;
@@ -700,295 +930,440 @@ button{
         display:none;
     }
 
-    .layout{
-        display:block;
-    }
-
     .main{
-        padding:18px 13px 90px;
+        padding:18px 12px 85px;
     }
 
     .cards{
-        grid-template-columns:repeat(2,1fr);
+        grid-template-columns:
+            repeat(2,1fr);
     }
 
     .gallery{
-        grid-template-columns:repeat(3,1fr);
-        gap:4px;
+        grid-template-columns:
+            repeat(3,1fr);
+
+        gap:3px;
     }
 
     .mobileNav{
         position:fixed;
-        bottom:0;
+
         left:0;
         right:0;
+        bottom:0;
+
         height:65px;
-        background:#06100a;
-        border-top:1px solid rgba(0,255,156,.18);
+
         display:flex;
+
+        align-items:center;
         justify-content:space-around;
-        z-index:80;
+
+        background:#050d08;
+
+        border-top:
+            1px solid rgba(0,255,156,.15);
+
+        z-index:100;
     }
 
     .mobileNav button{
         border:0;
+
         background:transparent;
-        color:#668073;
+
+        color:#637a6d;
+
         font-size:10px;
     }
 
-    .mobileNav button.active{
+    .mobileNav button:hover{
         color:var(--green);
     }
 
     .topbar{
-        padding:0 14px;
-    }
-
-    .brand{
-        font-size:13px;
-    }
-
-    .lockBox{
-        padding:22px;
+        padding:0 13px;
     }
 
     .word{
-        min-height:100px;
+        height:105px;
     }
 
-    .chinese{
-        font-size:26px;
+    .chineseWord{
+        font-size:30px;
     }
+
 }
 
-@keyframes correctMove{
-    0%{transform:scale(1)}
-    50%{transform:scale(1.08)}
-    100%{transform:scale(1)}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes correctPulse{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.08);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+
 }
 
 @keyframes shake{
-    0%,100%{transform:translateX(0)}
-    25%{transform:translateX(-7px)}
-    75%{transform:translateX(7px)}
+
+    0%,100%{
+        transform:translateX(0);
+    }
+
+    25%{
+        transform:translateX(-8px);
+    }
+
+    75%{
+        transform:translateX(8px);
+    }
+
 }
 
-@keyframes signature{
-    from{
+@keyframes chineseAppear{
+
+    0%{
         opacity:0;
-        transform:translateY(10px);
+
+        transform:
+            translate(-50%,-50%)
+            scale(.3);
     }
-    to{
+
+    35%{
         opacity:1;
-        transform:translateY(0);
+
+        transform:
+            translate(-50%,-50%)
+            scale(1);
     }
+
+    100%{
+        opacity:0;
+
+        transform:
+            translate(-50%,-50%)
+            scale(1);
+    }
+
 }
+
+@keyframes finalExpand{
+
+    0%{
+        opacity:0;
+
+        transform:
+            translate(-50%,-50%)
+            scale(.05);
+    }
+
+    15%{
+        opacity:1;
+    }
+
+    100%{
+        opacity:1;
+
+        transform:
+            translate(-50%,-50%)
+            scale(25);
+    }
+
+}
+
 </style>
+
 </head>
+
 
 <body>
 
-<!-- ========================================================= -->
-<!-- LOCK SCREEN -->
-<!-- ========================================================= -->
+
+<!-- =========================================================
+     CLEAN CHINESE AUTHENTICATION
+========================================================= -->
 
 <div id="lockScreen">
 
-<div class="lockBox">
+    <div class="lockArea">
 
-<div class="logo">🔐 HARSHA VAULT 29</div>
-<div class="logoSmall">PRIVATE CLOUD STORAGE</div>
+        <div class="systemLight"></div>
 
-<div class="status" id="systemStatus">
-SYSTEM: WAITING FOR AUTHENTICATION...
-</div>
+        <div class="wordGrid" id="grid1">
 
-<!-- CHALLENGE 1 -->
+            <div class="word"
+                 data-id="1">
 
-<div id="challenge1" class="challenge active">
+                <span class="chineseWord">
+                    阿克
+                </span>
 
-<div class="challengeTitle">CHALLENGE 01 / 02</div>
-
-<div class="challengeInfo">
-Drag or slide the correct words.<br>
-Sequence: move <b>1 → 2</b>, then <b>2 → 4</b>.
-</div>
-
-<div class="wordGrid" id="grid1">
-
-<div class="word" data-id="1" data-value="AK">
-<span class="wordNumber">01</span>
-<span class="chinese">阿克</span>
-<span class="phonetic">AK</span>
-</div>
-
-<div class="word" data-id="2" data-value="SHAYA">
-<span class="wordNumber">02</span>
-<span class="chinese">沙雅</span>
-<span class="phonetic">SHAYA</span>
-</div>
-
-<div class="word" data-id="3" data-value="X">
-<span class="wordNumber">03</span>
-<span class="chinese">青影</span>
-<span class="phonetic">X</span>
-</div>
-
-<div class="word" data-id="4" data-value="X">
-<span class="wordNumber">04</span>
-<span class="chinese">龙门</span>
-<span class="phonetic">X</span>
-</div>
-
-</div>
-
-<div class="progress">
-<span class="dot active"></span>
-<span class="dot"></span>
-<span class="dot"></span>
-</div>
-
-</div>
+            </div>
 
 
-<!-- CHALLENGE 2 -->
+            <div class="word"
+                 data-id="2">
 
-<div id="challenge2" class="challenge">
+                <span class="chineseWord">
+                    沙雅
+                </span>
 
-<div class="challengeTitle">CHALLENGE 02 / 02</div>
+            </div>
 
-<div class="challengeInfo">
-Continue the sequence.<br>
-Move <b>3 → 4</b>, then <b>4 → 2</b>.
-</div>
 
-<div class="wordGrid" id="grid2">
+            <div class="word"
+                 data-id="3">
 
-<div class="word" data-id="1" data-value="X">
-<span class="wordNumber">01</span>
-<span class="chinese">玄影</span>
-<span class="phonetic">X</span>
-</div>
+                <span class="chineseWord">
+                    青影
+                </span>
 
-<div class="word" data-id="2" data-value="X">
-<span class="wordNumber">02</span>
-<span class="chinese">青门</span>
-<span class="phonetic">X</span>
-</div>
+            </div>
 
-<div class="word" data-id="3" data-value="HAR">
-<span class="wordNumber">03</span>
-<span class="chinese">哈尔</span>
-<span class="phonetic">HAR</span>
-</div>
 
-<div class="word" data-id="4" data-value="SHA">
-<span class="wordNumber">04</span>
-<span class="chinese">沙</span>
-<span class="phonetic">SHA</span>
-</div>
+            <div class="word"
+                 data-id="4">
 
-</div>
+                <span class="chineseWord">
+                    龙门
+                </span>
 
-<div class="progress">
-<span class="dot active"></span>
-<span class="dot active"></span>
-<span class="dot"></span>
-</div>
+            </div>
+
+        </div>
+
+
+        <div class="challengeDots">
+
+            <span class="dot active"></span>
+
+            <span class="dot"></span>
+
+        </div>
+
+    </div>
 
 </div>
 
 
-<!-- SUCCESS -->
+<!-- =========================================================
+     CHINESE SUCCESS ANIMATION
+========================================================= -->
 
-<div id="success" class="success">
+<div id="nameAnimation">
 
-<div class="successIcon">✓</div>
+    <div
+        class="animationWord"
+        id="anim1">
+        阿
+    </div>
 
-<div class="successTitle">
-AUTHENTICATION VERIFIED
+    <div
+        class="animationWord"
+        id="anim2">
+        克
+    </div>
+
+    <div
+        class="animationWord"
+        id="anim3">
+        沙
+    </div>
+
+    <div
+        class="animationWord"
+        id="anim4">
+        雅
+    </div>
+
+    <div
+        class="animationWord"
+        id="anim5">
+        哈
+    </div>
+
+    <div
+        class="animationWord"
+        id="anim6">
+        尔
+    </div>
+
+    <div
+        class="animationWord"
+        id="anim7">
+        沙
+    </div>
+
+    <div
+        class="animationWord"
+        id="anim8">
+        克
+    </div>
+
+    <div
+        class="animationWord"
+        id="anim9">
+        沙
+    </div>
+
+    <div
+        class="animationWord"
+        id="anim10">
+        雅
+    </div>
+
+
+    <div id="finalName">
+        哈尔沙克沙雅
+    </div>
+
 </div>
 
-<div class="chineseName">
-阿克沙雅·哈尔沙
-</div>
 
-<div class="signature">
-harsha29
-</div>
-
-<div class="opening">
-VAULT OPENING...
-</div>
-
-</div>
-
-
-<button class="resetBtn" onclick="resetPuzzle()">
-RESET AUTHENTICATION
-</button>
-
-</div>
-</div>
-
-
-<!-- ========================================================= -->
-<!-- VAULT -->
-<!-- ========================================================= -->
+<!-- =========================================================
+     VAULT
+========================================================= -->
 
 <div id="vault">
 
 <header class="topbar">
 
-<div class="brand">
-🔐 HARSHA VAULT 29
-<span>PRIVATE CLOUD STORAGE</span>
-</div>
+    <div>
 
-<div class="topActions">
-<button class="iconBtn" onclick="openSettings()">⚙</button>
-<button class="iconBtn" onclick="lockVault()">🔒</button>
-</div>
+        <div class="privateTitle">
+            PRIVATE VAULT
+        </div>
+
+        <div class="privateStatus">
+            SECURE CLOUD STORAGE
+        </div>
+
+    </div>
+
+
+    <div class="topButtons">
+
+        <button
+            class="iconButton"
+            onclick="openSettings()">
+            ⚙
+        </button>
+
+        <button
+            class="iconButton"
+            onclick="lockVault()">
+            🔒
+        </button>
+
+    </div>
 
 </header>
 
+
 <div class="layout">
+
 
 <aside class="sidebar">
 
-<button class="navBtn active" onclick="showHome()">⌂ Home</button>
-<button class="navBtn" onclick="showPhotos()">▧ Photos</button>
-<button class="navBtn" onclick="showFiles()">▤ Files</button>
-<button class="navBtn" onclick="showPDFs()">▣ PDFs</button>
-<button class="navBtn" onclick="showPlaceholder('Contacts')">♙ Contacts</button>
-<button class="navBtn" onclick="showPlaceholder('Notes')">▤ Notes</button>
-<button class="navBtn" onclick="openSettings()">⚙ Settings</button>
+    <button
+        class="navButton active"
+        onclick="showHome()">
+        ⌂ Home
+    </button>
 
-<div class="storageMini">
-<div class="storageText" id="storageText">
-Storage: calculating...
-</div>
+    <button
+        class="navButton"
+        onclick="showPhotos()">
+        ▧ Photos
+    </button>
 
-<div class="storageBar">
-<div class="storageFill" id="storageFill"></div>
-</div>
+    <button
+        class="navButton"
+        onclick="showFiles()">
+        ▤ Files
+    </button>
 
-<button class="lockVault" onclick="lockVault()">
-🔒 Lock Vault
-</button>
-</div>
+    <button
+        class="navButton"
+        onclick="showPDFs()">
+        ▣ PDFs
+    </button>
+
+    <button
+        class="navButton"
+        onclick="showPlaceholder('Contacts')">
+        ♙ Contacts
+    </button>
+
+    <button
+        class="navButton"
+        onclick="showPlaceholder('Notes')">
+        📝 Notes
+    </button>
+
+    <button
+        class="navButton"
+        onclick="openSettings()">
+        ⚙ Settings
+    </button>
+
+
+    <div class="storageBox">
+
+        <div
+            class="storageText"
+            id="storageText">
+            Cloud storage
+        </div>
+
+        <div class="storageBar">
+
+            <div
+                class="storageFill"
+                id="storageFill">
+            </div>
+
+        </div>
+
+
+        <button
+            class="lockButton"
+            onclick="lockVault()">
+            🔒 Lock
+        </button>
+
+    </div>
 
 </aside>
 
 
 <main class="main">
 
+
 <div class="welcome">
-<h1 id="pageTitle">Welcome back, Harsha</h1>
-<p id="pageSubtitle">
-Your private cloud space.
-</p>
+
+    <h1 id="pageTitle">
+        Welcome back
+    </h1>
+
+    <p id="pageSubtitle">
+        Your private cloud space.
+    </p>
+
 </div>
 
 
@@ -996,809 +1371,1283 @@ Your private cloud space.
 
 <div id="homePage">
 
-<div class="cards">
+    <div class="cards">
 
-<div class="card" onclick="showPhotos()">
-<div class="cardIcon">📸</div>
-<div class="cardName">Photos</div>
-<div class="cardCount" id="photoCount">0 photos</div>
-</div>
+        <div
+            class="card"
+            onclick="showPhotos()">
 
-<div class="card" onclick="showFiles()">
-<div class="cardIcon">📁</div>
-<div class="cardName">Files</div>
-<div class="cardCount">Cloud storage</div>
-</div>
+            <div class="cardIcon">
+                📸
+            </div>
 
-<div class="card" onclick="showPDFs()">
-<div class="cardIcon">📄</div>
-<div class="cardName">PDFs</div>
-<div class="cardCount" id="pdfCount">0 PDFs</div>
-</div>
+            <div class="cardName">
+                Photos
+            </div>
 
-<div class="card" onclick="showPlaceholder('Contacts')">
-<div class="cardIcon">👤</div>
-<div class="cardName">Contacts</div>
-<div class="cardCount">Private</div>
-</div>
+            <div
+                class="cardCount"
+                id="photoCount">
+                0 photos
+            </div>
 
-<div class="card" onclick="showPlaceholder('Notes')">
-<div class="cardIcon">📝</div>
-<div class="cardName">Notes</div>
-<div class="cardCount">Private</div>
-</div>
+        </div>
 
-</div>
 
-<div class="section">
+        <div
+            class="card"
+            onclick="showFiles()">
 
-<div class="sectionHead">
-<h2>Recent Photos</h2>
-<button class="addBtn" onclick="showPhotos()">View Gallery</button>
-</div>
+            <div class="cardIcon">
+                📁
+            </div>
 
-<div class="gallery" id="homeGallery">
-<div class="empty">No photos uploaded yet.</div>
-</div>
+            <div class="cardName">
+                Files
+            </div>
 
-</div>
+            <div class="cardCount">
+                Private
+            </div>
+
+        </div>
+
+
+        <div
+            class="card"
+            onclick="showPDFs()">
+
+            <div class="cardIcon">
+                📄
+            </div>
+
+            <div class="cardName">
+                PDFs
+            </div>
+
+            <div
+                class="cardCount"
+                id="pdfCount">
+                0 PDFs
+            </div>
+
+        </div>
+
+
+        <div
+            class="card"
+            onclick="showPlaceholder('Contacts')">
+
+            <div class="cardIcon">
+                👤
+            </div>
+
+            <div class="cardName">
+                Contacts
+            </div>
+
+            <div class="cardCount">
+                Private
+            </div>
+
+        </div>
+
+
+        <div
+            class="card"
+            onclick="showPlaceholder('Notes')">
+
+            <div class="cardIcon">
+                📝
+            </div>
+
+            <div class="cardName">
+                Notes
+            </div>
+
+            <div class="cardCount">
+                Private
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="section">
+
+        <div class="sectionHeader">
+
+            <h2>
+                Recent Photos
+            </h2>
+
+            <button
+                class="addButton"
+                onclick="showPhotos()">
+                Gallery
+            </button>
+
+        </div>
+
+
+        <div
+            class="gallery"
+            id="homeGallery">
+
+            <div class="empty">
+                No photos yet.
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
 
 <!-- PHOTOS -->
 
-<div id="photosPage" style="display:none">
+<div
+    id="photosPage"
+    style="display:none">
 
-<div class="sectionHead">
-<h2>Photos</h2>
+    <div class="sectionHeader">
 
-<label class="addBtn">
-＋ Add Photos
-<input
-type="file"
-id="photoInput"
-accept="image/*"
-multiple
-hidden
-onchange="uploadPhotos(this.files)"
->
-</label>
+        <h2>
+            Photos
+        </h2>
 
-</div>
 
-<div class="gallery" id="photoGallery">
-<div class="empty">Loading gallery...</div>
-</div>
+        <label class="addButton">
+
+            ＋ Add Photos
+
+            <input
+                type="file"
+                accept="image/*"
+                multiple
+                hidden
+                onchange="uploadPhotos(this.files)">
+
+        </label>
+
+    </div>
+
+
+    <div
+        class="gallery"
+        id="photoGallery">
+
+        <div class="empty">
+            Loading...
+        </div>
+
+    </div>
 
 </div>
 
 
 <!-- FILES -->
 
-<div id="filesPage" style="display:none">
+<div
+    id="filesPage"
+    style="display:none">
 
-<div class="sectionHead">
-<h2>Files</h2>
+    <div class="sectionHeader">
 
-<label class="addBtn">
-＋ Add Files
-<input
-type="file"
-id="fileInput"
-multiple
-hidden
-onchange="uploadFiles(this.files)"
->
-</label>
-
-</div>
-
-<div class="fileList" id="fileList">
-<div class="empty">No files uploaded.</div>
-</div>
-
-</div>
+        <h2>
+            Files
+        </h2>
 
 
-<!-- PDF -->
+        <label class="addButton">
 
-<div id="pdfPage" style="display:none">
+            ＋ Add Files
 
-<div class="sectionHead">
-<h2>PDF Documents</h2>
+            <input
+                type="file"
+                multiple
+                hidden
+                onchange="uploadFiles(this.files)">
 
-<label class="addBtn">
-＋ Add PDF
-<input
-type="file"
-id="pdfInput"
-accept="application/pdf"
-multiple
-hidden
-onchange="uploadPDFs(this.files)"
->
-</label>
+        </label>
+
+    </div>
+
+
+    <div
+        class="fileList"
+        id="fileList">
+
+        <div class="empty">
+            No files.
+        </div>
+
+    </div>
 
 </div>
 
-<div class="fileList" id="pdfList">
-<div class="empty">No PDFs uploaded.</div>
-</div>
+
+<!-- PDFs -->
+
+<div
+    id="pdfPage"
+    style="display:none">
+
+    <div class="sectionHeader">
+
+        <h2>
+            PDFs
+        </h2>
+
+
+        <label class="addButton">
+
+            ＋ Add PDF
+
+            <input
+                type="file"
+                accept="application/pdf"
+                multiple
+                hidden
+                onchange="uploadPDFs(this.files)">
+
+        </label>
+
+    </div>
+
+
+    <div
+        class="fileList"
+        id="pdfList">
+
+        <div class="empty">
+            No PDFs.
+        </div>
+
+    </div>
 
 </div>
+
 
 </main>
+
 </div>
 
+
+<!-- MOBILE NAV -->
 
 <div class="mobileNav">
 
-<button onclick="showHome()">⌂<br>Home</button>
-<button onclick="showPhotos()">▧<br>Photos</button>
-<button onclick="showFiles()">▤<br>Files</button>
-<button onclick="showPDFs()">▣<br>PDFs</button>
-<button onclick="openSettings()">⚙<br>More</button>
+    <button onclick="showHome()">
+        ⌂<br>Home
+    </button>
+
+    <button onclick="showPhotos()">
+        ▧<br>Photos
+    </button>
+
+    <button onclick="showFiles()">
+        ▤<br>Files
+    </button>
+
+    <button onclick="showPDFs()">
+        ▣<br>PDFs
+    </button>
+
+    <button onclick="openSettings()">
+        ⚙<br>More
+    </button>
 
 </div>
 
 </div>
 
 
-<!-- PHOTO VIEWER -->
+<!-- =========================================================
+     PHOTO VIEWER
+========================================================= -->
 
-<div class="modal" id="photoModal">
+<div
+    class="modal"
+    id="photoModal">
 
-<div class="modalBox viewer">
+    <div class="modalBox">
 
-<div class="modalHead">
+        <div class="modalHeader">
 
-<strong id="photoViewerName">Photo</strong>
+            <strong id="photoViewerName">
+                Photo
+            </strong>
 
-<button class="close" onclick="closeModal('photoModal')">
-×
-</button>
+            <button
+                class="closeButton"
+                onclick="closeModal('photoModal')">
+                ×
+            </button>
 
-</div>
-
-<img id="photoViewerImage" src="">
-
-</div>
-</div>
-
-
-<!-- PDF VIEWER -->
-
-<div class="modal" id="pdfModal">
-
-<div class="modalBox">
-
-<div class="modalHead">
-
-<strong id="pdfViewerName">PDF</strong>
-
-<button class="close" onclick="closeModal('pdfModal')">
-×
-</button>
-
-</div>
-
-<div class="pdfPreview">
-<iframe id="pdfFrame"></iframe>
-</div>
-
-</div>
-</div>
+        </div>
 
 
-<!-- SETTINGS -->
+        <img
+            id="photoViewerImage"
+            class="viewerImage">
 
-<div class="modal" id="settingsModal">
-
-<div class="modalBox">
-
-<div class="modalHead">
-
-<strong>⚙ Vault Settings</strong>
-
-<button class="close" onclick="closeModal('settingsModal')">
-×
-</button>
+    </div>
 
 </div>
 
 
-<div class="setting">
+<!-- =========================================================
+     PDF VIEWER
+========================================================= -->
 
-<div class="settingInfo">
-<strong>Cyber Interface</strong>
-<small>Keep the dark neon interface enabled.</small>
-</div>
+<div
+    class="modal"
+    id="pdfModal">
 
-<button class="switch on" onclick="toggleSwitch(this)">
-<span></span>
-</button>
+    <div class="modalBox">
 
-</div>
+        <div class="modalHeader">
 
+            <strong id="pdfViewerName">
+                PDF
+            </strong>
 
-<div class="setting">
+            <button
+                class="closeButton"
+                onclick="closeModal('pdfModal')">
+                ×
+            </button>
 
-<div class="settingInfo">
-<strong>Gallery Preview</strong>
-<small>Show image thumbnails in the vault.</small>
-</div>
-
-<button class="switch on" onclick="toggleSwitch(this)">
-<span></span>
-</button>
-
-</div>
+        </div>
 
 
-<div class="setting">
+        <iframe
+            id="pdfFrame"
+            class="pdfFrame">
+        </iframe>
 
-<div class="settingInfo">
-<strong>Confirm Before Delete</strong>
-<small>Ask before deleting cloud files.</small>
-</div>
-
-<button class="switch on" onclick="toggleSwitch(this)">
-<span></span>
-</button>
+    </div>
 
 </div>
 
 
-<div class="setting">
+<!-- =========================================================
+     SETTINGS
+========================================================= -->
 
-<div class="settingInfo">
-<strong>Automatic Session</strong>
-<small>Keep the vault session on this device.</small>
+<div
+    class="modal"
+    id="settingsModal">
+
+    <div class="modalBox">
+
+        <div class="modalHeader">
+
+            <strong>
+                ⚙ Settings
+            </strong>
+
+            <button
+                class="closeButton"
+                onclick="closeModal('settingsModal')">
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="settingRow">
+
+            <div class="settingInfo">
+
+                <strong>
+                    Dark Interface
+                </strong>
+
+                <small>
+                    Cyber-style appearance.
+                </small>
+
+            </div>
+
+
+            <button
+                class="switch on"
+                onclick="toggleSwitch(this)">
+
+                <span></span>
+
+            </button>
+
+        </div>
+
+
+        <div class="settingRow">
+
+            <div class="settingInfo">
+
+                <strong>
+                    Gallery Preview
+                </strong>
+
+                <small>
+                    Display photo thumbnails.
+                </small>
+
+            </div>
+
+
+            <button
+                class="switch on"
+                onclick="toggleSwitch(this)">
+
+                <span></span>
+
+            </button>
+
+        </div>
+
+
+        <div class="settingRow">
+
+            <div class="settingInfo">
+
+                <strong>
+                    Delete Confirmation
+                </strong>
+
+                <small>
+                    Ask before deleting files.
+                </small>
+
+            </div>
+
+
+            <button
+                class="switch on"
+                onclick="toggleSwitch(this)">
+
+                <span></span>
+
+            </button>
+
+        </div>
+
+
+        <div class="settingRow">
+
+            <div class="settingInfo">
+
+                <strong>
+                    Cloud Connection
+                </strong>
+
+                <small id="cloudStatus">
+                    Checking...
+                </small>
+
+            </div>
+
+            <span>
+                ☁️
+            </span>
+
+        </div>
+
+
+        <div class="settingRow">
+
+            <div class="settingInfo">
+
+                <strong>
+                    Storage Used
+                </strong>
+
+                <small>
+                    Private cloud storage.
+                </small>
+
+            </div>
+
+            <strong id="settingsStorage">
+                0 MB
+            </strong>
+
+        </div>
+
+    </div>
+
 </div>
 
-<button class="switch on" onclick="toggleSwitch(this)">
-<span></span>
-</button>
 
+<div
+    class="toast"
+    id="toast">
 </div>
-
-
-<div class="setting">
-
-<div class="settingInfo">
-<strong>Storage</strong>
-<small>Supabase private cloud storage.</small>
-</div>
-
-<strong id="settingsStorage">
-Calculating...
-</strong>
-
-</div>
-
-
-<div class="setting">
-
-<div class="settingInfo">
-<strong>Security</strong>
-<small>Storage access is controlled by Supabase.</small>
-</div>
-
-<span>🔐</span>
-
-</div>
-
-</div>
-</div>
-
-
-<div class="toast" id="toast"></div>
 
 
 <script>
 
-/* ============================================================
-   SUPABASE CONFIGURATION
-   ============================================================
-
-   Replace ONLY the value below with your Supabase
-   publishable/anon key.
-
-   Do NOT use a service_role key here.
-============================================================ */
+/* =========================================================
+   SUPABASE
+========================================================= */
 
 const SUPABASE_URL =
 "https://wuvywetmzceyvfudplht.supabase.co";
 
+
+/*
+ IMPORTANT:
+
+ Put your existing SUPABASE PUBLISHABLE KEY here.
+
+ Do NOT use a service_role key.
+*/
+
 const SUPABASE_KEY =
-"PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE";
+"PASTE_YOUR_EXISTING_PUBLISHABLE_KEY_HERE";
+
 
 const supabaseClient =
 supabase.createClient(
     SUPABASE_URL,
-    SUPABASE_KEY
+    SUPABASE_KEY,
+    {
+        auth:{
+            persistSession:true,
+            autoRefreshToken:true,
+            detectSessionInUrl:false
+        }
+    }
 );
 
-
-/* ============================================================
-   GLOBAL
-============================================================ */
 
 let currentUser = null;
 
-const PHOTO_FOLDER = "photos";
-const PDF_FOLDER = "pdfs";
-const FILE_FOLDER = "files";
 
+/* =========================================================
+   CLOUD CONNECTION
+========================================================= */
 
-/* ============================================================
-   TOAST
-============================================================ */
-
-function toast(message){
-
-    const el = document.getElementById("toast");
-
-    el.textContent = message;
-    el.classList.add("show");
-
-    setTimeout(()=>{
-        el.classList.remove("show");
-    },2500);
-}
-
-
-/* ============================================================
-   CHINESE PUZZLE
-============================================================ */
-
-let selected = null;
-
-let challenge1Moves = [];
-let challenge2Moves = [];
-
-let challenge1Done = false;
-
-
-/* ---------- word replacement ---------- */
-
-function replaceWord(word,newChinese,newPhonetic){
-
-    word.querySelector(".chinese").textContent =
-        newChinese;
-
-    word.querySelector(".phonetic").textContent =
-        newPhonetic || "X";
-}
-
-
-/* ---------- drag / touch ---------- */
-
-function setupDragGrid(gridId,moveCallback){
-
-    const grid =
-        document.getElementById(gridId);
-
-    const words =
-        grid.querySelectorAll(".word");
-
-    words.forEach(word=>{
-
-        word.addEventListener("pointerdown",(e)=>{
-
-            e.preventDefault();
-
-            selected = word;
-
-            word.classList.add("dragging");
-
-            try{
-                word.setPointerCapture(e.pointerId);
-            }catch(err){}
-
-        });
-
-
-        word.addEventListener("pointerup",(e)=>{
-
-            e.preventDefault();
-
-            if(!selected){
-                return;
-            }
-
-            const target =
-                document.elementFromPoint(
-                    e.clientX,
-                    e.clientY
-                )?.closest(".word");
-
-            selected.classList.remove("dragging");
-
-            if(
-                target &&
-                target.parentElement === grid &&
-                target !== selected
-            ){
-
-                const from =
-                    Number(selected.dataset.id);
-
-                const to =
-                    Number(target.dataset.id);
-
-                moveCallback(from,to,selected,target);
-            }
-
-            selected = null;
-        });
-
-    });
-}
-
-
-/* ============================================================
-   CHALLENGE 1
-============================================================ */
-
-function handleChallenge1(from,to,source,target){
-
-    const expected = [
-        [1,2],
-        [2,4]
-    ];
-
-    const current =
-        challenge1Moves.length;
-
-    if(
-        expected[current] &&
-        expected[current][0] === from &&
-        expected[current][1] === to
-    ){
-
-        challenge1Moves.push([from,to]);
-
-        source.classList.add("correct");
-
-        /* First word changes after moving 1 -> 2 */
-
-        if(from === 1 && to === 2){
-
-            replaceWord(
-                source,
-                "玄门",
-                "X"
-            );
-
-            replaceWord(
-                target,
-                "阿克",
-                "AK"
-            );
-
-            toast("FIRST WORD VERIFIED");
-
-        }
-
-
-        /* Second move */
-
-        if(from === 2 && to === 4){
-
-            replaceWord(
-                source,
-                "青影",
-                "X"
-            );
-
-            replaceWord(
-                target,
-                "沙雅",
-                "SHAYA"
-            );
-
-            challenge1Done = true;
-
-            toast("CHALLENGE 01 VERIFIED");
-
-            setTimeout(()=>{
-                startChallenge2();
-            },900);
-        }
-
-    }else{
-
-        source.classList.add("wrong");
-
-        target.classList.add("wrong");
-
-        setTimeout(()=>{
-
-            source.classList.remove("wrong");
-            target.classList.remove("wrong");
-
-        },400);
-
-        toast("WRONG MOVEMENT");
-
-        challenge1Moves = [];
-
-        resetChallenge1Visual();
-    }
-}
-
-
-/* ============================================================
-   RESET CHALLENGE 1 VISUAL
-============================================================ */
-
-function resetChallenge1Visual(){
-
-    const words =
-        document.querySelectorAll("#grid1 .word");
-
-    replaceWord(words[0],"阿克","AK");
-    replaceWord(words[1],"沙雅","SHAYA");
-    replaceWord(words[2],"青影","X");
-    replaceWord(words[3],"龙门","X");
-}
-
-
-/* ============================================================
-   CHALLENGE 2
-============================================================ */
-
-function startChallenge2(){
-
-    document
-        .getElementById("challenge1")
-        .classList.remove("active");
-
-    document
-        .getElementById("challenge2")
-        .classList.add("active");
-
-    challenge2Moves = [];
-
-    const words =
-        document.querySelectorAll("#grid2 .word");
-
-    replaceWord(words[0],"玄影","X");
-    replaceWord(words[1],"青门","X");
-    replaceWord(words[2],"哈尔","HAR");
-    replaceWord(words[3],"沙","SHA");
-
-    document.getElementById("systemStatus")
-        .textContent =
-        "SYSTEM: CHALLENGE 01 VERIFIED / CONTINUE";
-}
-
-
-function handleChallenge2(from,to,source,target){
-
-    const expected = [
-        [3,4],
-        [4,2]
-    ];
-
-    const current =
-        challenge2Moves.length;
-
-    if(
-        expected[current] &&
-        expected[current][0] === from &&
-        expected[current][1] === to
-    ){
-
-        challenge2Moves.push([from,to]);
-
-        source.classList.add("correct");
-
-        /* HAR moves to SHA */
-
-        if(from === 3 && to === 4){
-
-            replaceWord(
-                source,
-                "玄影",
-                "X"
-            );
-
-            replaceWord(
-                target,
-                "哈尔",
-                "HAR"
-            );
-
-            toast("HAR VERIFIED");
-        }
-
-
-        /* SHA moves to second */
-
-        if(from === 4 && to === 2){
-
-            replaceWord(
-                source,
-                "青影",
-                "X"
-            );
-
-            replaceWord(
-                target,
-                "沙",
-                "SHA"
-            );
-
-            toast("SHA VERIFIED");
-
-            setTimeout(unlockVault,1000);
-        }
-
-    }else{
-
-        source.classList.add("wrong");
-        target.classList.add("wrong");
-
-        setTimeout(()=>{
-
-            source.classList.remove("wrong");
-            target.classList.remove("wrong");
-
-        },400);
-
-        toast("WRONG MOVEMENT");
-
-        challenge2Moves = [];
-    }
-}
-
-
-/* ============================================================
-   PUZZLE SETUP
-============================================================ */
-
-setupDragGrid(
-    "grid1",
-    handleChallenge1
-);
-
-setupDragGrid(
-    "grid2",
-    handleChallenge2
-);
-
-
-/* ============================================================
-   RESET
-============================================================ */
-
-function resetPuzzle(){
-
-    challenge1Moves = [];
-    challenge2Moves = [];
-
-    challenge1Done = false;
-
-    document
-        .getElementById("challenge1")
-        .classList.add("active");
-
-    document
-        .getElementById("challenge2")
-        .classList.remove("active");
-
-    document
-        .getElementById("success")
-        .classList.remove("show");
-
-    resetChallenge1Visual();
-
-    document.getElementById("systemStatus")
-        .textContent =
-        "SYSTEM: WAITING FOR AUTHENTICATION...";
-}
-
-
-/* ============================================================
-   UNLOCK
-============================================================ */
-
-async function unlockVault(){
-
-    document
-        .getElementById("challenge2")
-        .classList.remove("active");
-
-    document
-        .getElementById("success")
-        .classList.add("show");
-
-    document.getElementById("systemStatus")
-        .textContent =
-        "SYSTEM: ACCESS VERIFIED";
-
-    setTimeout(async()=>{
-
-        document
-            .getElementById("lockScreen")
-            .style.display="none";
-
-        document
-            .getElementById("vault")
-            .style.display="block";
-
-        await startCloudSession();
-
-    },2200);
-}
-
-
-/* ============================================================
-   SUPABASE ANONYMOUS SESSION
-============================================================ */
-
-async function startCloudSession(){
-
-    if(
-        SUPABASE_KEY ===
-        "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
-    ){
-
-        toast("Add your Supabase publishable key first.");
-        return;
-    }
+async function ensureCloudSession(){
 
     try{
 
-        let result =
-            await supabaseClient.auth.getSession();
+        if(
+            SUPABASE_KEY ===
+            "PASTE_YOUR_EXISTING_PUBLISHABLE_KEY_HERE"
+        ){
 
-        let session =
-            result.data.session;
+            throw new Error(
+                "Supabase publishable key is missing."
+            );
 
-        if(!session){
-
-            const anon =
-                await supabaseClient.auth.signInAnonymously();
-
-            if(anon.error){
-                throw anon.error;
-            }
-
-            session =
-                anon.data.session;
         }
 
+
+        /*
+         First check existing session.
+        */
+
+        const sessionResult =
+            await supabaseClient
+            .auth
+            .getSession();
+
+
+        if(
+            sessionResult.data &&
+            sessionResult.data.session
+        ){
+
+            currentUser =
+                sessionResult.data.session.user;
+
+            setCloudStatus(true);
+
+            return true;
+        }
+
+
+        /*
+         No session:
+         create anonymous session.
+        */
+
+        const result =
+            await supabaseClient
+            .auth
+            .signInAnonymously();
+
+
+        if(result.error){
+
+            throw result.error;
+
+        }
+
+
         currentUser =
-            session?.user || null;
+            result.data.user ||
+            result.data.session?.user;
 
-        toast("PRIVATE CLOUD CONNECTED");
 
-        await refreshAll();
+        if(!currentUser){
+
+            throw new Error(
+                "Cloud user was not created."
+            );
+
+        }
+
+
+        setCloudStatus(true);
+
+        return true;
 
     }catch(error){
 
-        console.error(error);
-
-        toast(
-            "Cloud connection failed"
+        console.error(
+            "CLOUD ERROR:",
+            error
         );
+
+
+        currentUser=null;
+
+        setCloudStatus(false);
+
+        return false;
+
     }
+
 }
 
 
-/* ============================================================
-   STORAGE PATH
-============================================================ */
+/* =========================================================
+   CLOUD STATUS
+========================================================= */
 
-function userPath(folder,fileName){
+function setCloudStatus(connected){
 
-    if(!currentUser){
-        throw new Error("No cloud user.");
+    const status =
+        document.getElementById(
+            "cloudStatus"
+        );
+
+    if(!status){
+        return;
     }
+
+
+    if(connected){
+
+        status.textContent =
+            "Connected";
+
+        status.style.color =
+            "#00ff9c";
+
+    }else{
+
+        status.textContent =
+            "Connection unavailable";
+
+        status.style.color =
+            "#ff6575";
+
+    }
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(message){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+    toast.textContent=message;
+
+    toast.classList.add("show");
+
+    setTimeout(()=>{
+
+        toast.classList.remove("show");
+
+    },2800);
+
+}
+
+
+/* =========================================================
+   PUZZLE
+========================================================= */
+
+let selectedWord=null;
+
+let moveStep=0;
+
+
+/*
+ Required movement:
+
+ 1 → 2
+ 2 → 4
+
+ Then:
+
+ 3 → 4
+ 4 → 2
+*/
+
+
+let challenge=1;
+
+let moves=[];
+
+
+function setupPuzzle(){
+
+    document
+        .querySelectorAll(".word")
+        .forEach(word=>{
+
+            word.addEventListener(
+                "pointerdown",
+                startDrag
+            );
+
+            word.addEventListener(
+                "pointerup",
+                endDrag
+            );
+
+        });
+
+}
+
+
+function startDrag(event){
+
+    event.preventDefault();
+
+    selectedWord=this;
+
+    this.classList.add("dragging");
+
+    try{
+
+        this.setPointerCapture(
+            event.pointerId
+        );
+
+    }catch(e){}
+
+}
+
+
+function endDrag(event){
+
+    event.preventDefault();
+
+    if(!selectedWord){
+        return;
+    }
+
+
+    const target =
+        document
+        .elementFromPoint(
+            event.clientX,
+            event.clientY
+        )
+        ?.closest(".word");
+
+
+    selectedWord.classList.remove(
+        "dragging"
+    );
+
+
+    if(
+        target &&
+        target !== selectedWord
+    ){
+
+        const from =
+            Number(
+                selectedWord.dataset.id
+            );
+
+        const to =
+            Number(
+                target.dataset.id
+            );
+
+
+        processMove(
+            from,
+            to,
+            selectedWord,
+            target
+        );
+
+    }
+
+
+    selectedWord=null;
+
+}
+
+
+function processMove(
+    from,
+    to,
+    source,
+    target
+){
+
+    const expected =
+        challenge===1
+        ?
+        [
+            [1,2],
+            [2,4]
+        ]
+        :
+        [
+            [3,4],
+            [4,2]
+        ];
+
+
+    const required =
+        expected[moves.length];
+
+
+    if(
+        required &&
+        required[0]===from &&
+        required[1]===to
+    ){
+
+        moves.push(
+            [from,to]
+        );
+
+
+        source.classList.add(
+            "correct"
+        );
+
+
+        if(challenge===1){
+
+            if(
+                from===1 &&
+                to===2
+            ){
+
+                changeWord(
+                    source,
+                    "玄门"
+                );
+
+                changeWord(
+                    target,
+                    "阿克"
+                );
+
+            }
+
+
+            if(
+                from===2 &&
+                to===4
+            ){
+
+                changeWord(
+                    source,
+                    "青影"
+                );
+
+                changeWord(
+                    target,
+                    "沙雅"
+                );
+
+
+                setTimeout(
+                    beginSecondChallenge,
+                    600
+                );
+
+            }
+
+        }else{
+
+
+            if(
+                from===3 &&
+                to===4
+            ){
+
+                changeWord(
+                    source,
+                    "玄影"
+                );
+
+                changeWord(
+                    target,
+                    "哈尔"
+                );
+
+            }
+
+
+            if(
+                from===4 &&
+                to===2
+            ){
+
+                changeWord(
+                    source,
+                    "青门"
+                );
+
+                changeWord(
+                    target,
+                    "沙"
+                );
+
+
+                setTimeout(
+                    startFinalAnimation,
+                    600
+                );
+
+            }
+
+        }
+
+
+    }else{
+
+        source.classList.add(
+            "wrong"
+        );
+
+        target.classList.add(
+            "wrong"
+        );
+
+
+        setTimeout(()=>{
+
+            source.classList.remove(
+                "wrong"
+            );
+
+            target.classList.remove(
+                "wrong"
+            );
+
+        },400);
+
+
+        moves=[];
+
+    }
+
+}
+
+
+/* =========================================================
+   CHANGE CHINESE WORD
+========================================================= */
+
+function changeWord(
+    element,
+    text
+){
+
+    const span =
+        element.querySelector(
+            ".chineseWord"
+        );
+
+
+    span.style.opacity="0";
+
+
+    setTimeout(()=>{
+
+        span.textContent=text;
+
+        span.style.opacity="1";
+
+    },120);
+
+}
+
+
+/* =========================================================
+   SECOND CHALLENGE
+========================================================= */
+
+function beginSecondChallenge(){
+
+    challenge=2;
+
+    moves=[];
+
+    const grid =
+        document.getElementById(
+            "grid1"
+        );
+
+
+    const words =
+        grid.querySelectorAll(
+            ".word"
+        );
+
+
+    changeWord(
+        words[0],
+        "玄影"
+    );
+
+    changeWord(
+        words[1],
+        "青门"
+    );
+
+    changeWord(
+        words[2],
+        "哈尔"
+    );
+
+    changeWord(
+        words[3],
+        "沙"
+    );
+
+
+    /*
+     Keep exactly the same positions.
+     The interface never shows instructions.
+    */
+
+}
+
+
+/* =========================================================
+   FINAL ANIMATION
+========================================================= */
+
+function startFinalAnimation(){
+
+    document
+        .getElementById(
+            "lockScreen"
+        )
+        .style.display="none";
+
+
+    const animation =
+        document.getElementById(
+            "nameAnimation"
+        );
+
+
+    animation.classList.add(
+        "show"
+    );
+
+
+    const words =
+        animation.querySelectorAll(
+            ".animationWord"
+        );
+
+
+    words.forEach(
+        word=>{
+            word.classList.remove(
+                "appear"
+            );
+        }
+    );
+
+
+    /*
+     One Chinese character after another,
+     exactly at the centre.
+    */
+
+    words.forEach(
+        (word,index)=>{
+
+            setTimeout(()=>{
+
+                word.classList.add(
+                    "appear"
+                );
+
+            },index*430);
+
+        }
+    );
+
+
+    /*
+     Final Chinese name.
+    */
+
+    const finalDelay =
+        words.length*430 + 500;
+
+
+    setTimeout(()=>{
+
+        document
+            .getElementById(
+                "finalName"
+            )
+            .classList.add(
+                "expand"
+            );
+
+
+    },finalDelay);
+
+
+    /*
+     Open vault after expansion.
+    */
+
+    setTimeout(()=>{
+
+        animation.style.display="none";
+
+        openVault();
+
+    },finalDelay+2300);
+
+}
+
+
+/* =========================================================
+   OPEN VAULT
+========================================================= */
+
+async function openVault(){
+
+    document
+        .getElementById(
+            "vault"
+        )
+        .style.display="block";
+
+
+    /*
+     IMPORTANT:
+     Cloud session starts immediately.
+    */
+
+    const connected =
+        await ensureCloudSession();
+
+
+    if(connected){
+
+        await refreshVault();
+
+    }else{
+
+        showToast(
+            "Cloud connection needs setup"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+function resetPuzzle(){
+
+    challenge=1;
+
+    moves=[];
+
+
+    const words =
+        document.querySelectorAll(
+            "#grid1 .word"
+        );
+
+
+    changeWord(
+        words[0],
+        "阿克"
+    );
+
+    changeWord(
+        words[1],
+        "沙雅"
+    );
+
+    changeWord(
+        words[2],
+        "青影"
+    );
+
+    changeWord(
+        words[3],
+        "龙门"
+    );
+
+
+    document
+        .getElementById(
+            "lockScreen"
+        )
+        .style.display="flex";
+
+
+    document
+        .getElementById(
+            "nameAnimation"
+        )
+        .classList.remove(
+            "show"
+        );
+
+}
+
+
+/* =========================================================
+   USER PATH
+========================================================= */
+
+function makePath(
+    folder,
+    filename
+){
 
     return (
         currentUser.id +
@@ -1807,14 +2656,55 @@ function userPath(folder,fileName){
         "/" +
         Date.now() +
         "_" +
-        fileName.replace(/[^a-zA-Z0-9._-]/g,"_")
+        filename
+            .replace(
+                /[^a-zA-Z0-9._-]/g,
+                "_"
+            )
     );
+
 }
 
 
-/* ============================================================
+/* =========================================================
+   ENSURE CLOUD BEFORE UPLOAD
+========================================================= */
+
+async function ensureReadyForUpload(){
+
+    if(currentUser){
+        return true;
+    }
+
+
+    showToast(
+        "Connecting to private cloud..."
+    );
+
+
+    const connected =
+        await ensureCloudSession();
+
+
+    if(!connected){
+
+        showToast(
+            "Cloud connection failed"
+        );
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* =========================================================
    PHOTO UPLOAD
-============================================================ */
+========================================================= */
 
 async function uploadPhotos(files){
 
@@ -1822,24 +2712,40 @@ async function uploadPhotos(files){
         return;
     }
 
-    if(!currentUser){
-        toast("Cloud session not ready.");
+
+    const ready =
+        await ensureReadyForUpload();
+
+
+    if(!ready){
         return;
     }
 
-    for(const file of files){
 
-        if(!file.type.startsWith("image/")){
+    let uploaded=0;
+
+
+    for(
+        const file of files
+    ){
+
+        if(
+            !file.type.startsWith(
+                "image/"
+            )
+        ){
             continue;
         }
+
 
         try{
 
             const path =
-                userPath(
-                    PHOTO_FOLDER,
+                makePath(
+                    "photos",
                     file.name
                 );
+
 
             const result =
                 await supabaseClient
@@ -1854,30 +2760,53 @@ async function uploadPhotos(files){
                     }
                 );
 
+
             if(result.error){
                 throw result.error;
             }
 
+
+            uploaded++;
+
+
         }catch(error){
 
-            console.error(error);
-
-            toast(
-                "Photo upload failed"
+            console.error(
+                "PHOTO ERROR:",
+                error
             );
+
+
+            showToast(
+                "Photo upload failed: " +
+                error.message
+            );
+
         }
+
     }
 
-    toast("Photos uploaded");
+
+    if(uploaded){
+
+        showToast(
+            uploaded +
+            " photo(s) uploaded"
+        );
+
+    }
+
 
     await refreshPhotos();
-    await updateStorageInfo();
+
+    await updateStorage();
+
 }
 
 
-/* ============================================================
+/* =========================================================
    PDF UPLOAD
-============================================================ */
+========================================================= */
 
 async function uploadPDFs(files){
 
@@ -1885,19 +2814,39 @@ async function uploadPDFs(files){
         return;
     }
 
-    for(const file of files){
 
-        if(file.type !== "application/pdf"){
+    const ready =
+        await ensureReadyForUpload();
+
+
+    if(!ready){
+        return;
+    }
+
+
+    let uploaded=0;
+
+
+    for(
+        const file of files
+    ){
+
+        if(
+            file.type !==
+            "application/pdf"
+        ){
             continue;
         }
+
 
         try{
 
             const path =
-                userPath(
-                    PDF_FOLDER,
+                makePath(
+                    "pdfs",
                     file.name
                 );
+
 
             const result =
                 await supabaseClient
@@ -1912,30 +2861,52 @@ async function uploadPDFs(files){
                     }
                 );
 
+
             if(result.error){
                 throw result.error;
             }
 
+
+            uploaded++;
+
+
         }catch(error){
 
-            console.error(error);
-
-            toast(
-                "PDF upload failed"
+            console.error(
+                "PDF ERROR:",
+                error
             );
+
+            showToast(
+                "PDF upload failed: " +
+                error.message
+            );
+
         }
+
     }
 
-    toast("PDF uploaded");
+
+    if(uploaded){
+
+        showToast(
+            uploaded +
+            " PDF(s) uploaded"
+        );
+
+    }
+
 
     await refreshPDFs();
-    await updateStorageInfo();
+
+    await updateStorage();
+
 }
 
 
-/* ============================================================
-   GENERAL FILE UPLOAD
-============================================================ */
+/* =========================================================
+   GENERAL FILES
+========================================================= */
 
 async function uploadFiles(files){
 
@@ -1943,15 +2914,28 @@ async function uploadFiles(files){
         return;
     }
 
-    for(const file of files){
+
+    const ready =
+        await ensureReadyForUpload();
+
+
+    if(!ready){
+        return;
+    }
+
+
+    for(
+        const file of files
+    ){
 
         try{
 
             const path =
-                userPath(
-                    FILE_FOLDER,
+                makePath(
+                    "files",
                     file.name
                 );
+
 
             const result =
                 await supabaseClient
@@ -1962,43 +2946,59 @@ async function uploadFiles(files){
                     file
                 );
 
+
             if(result.error){
                 throw result.error;
             }
+
 
         }catch(error){
 
             console.error(error);
 
-            toast(
-                "File upload failed"
+            showToast(
+                "File upload failed: " +
+                error.message
             );
+
         }
+
     }
 
-    toast("Files uploaded");
+
+    showToast(
+        "Files uploaded"
+    );
+
 
     await refreshFiles();
-    await updateStorageInfo();
+
+    await updateStorage();
+
 }
 
 
-/* ============================================================
-   LIST STORAGE
-============================================================ */
+/* =========================================================
+   LIST FOLDER
+========================================================= */
 
-async function listFolder(folder){
+async function listFolder(
+    folder
+){
 
     if(!currentUser){
         return [];
     }
+
 
     const result =
         await supabaseClient
         .storage
         .from("vault")
         .list(
-            currentUser.id + "/" + folder,
+            currentUser.id +
+            "/" +
+            folder,
             {
                 limit:1000,
                 sortBy:{
@@ -2008,22 +3008,31 @@ async function listFolder(folder){
             }
         );
 
+
     if(result.error){
 
-        console.error(result.error);
+        console.error(
+            "LIST ERROR:",
+            result.error
+        );
 
         return [];
+
     }
 
+
     return result.data || [];
+
 }
 
 
-/* ============================================================
+/* =========================================================
    SIGNED URL
-============================================================ */
+========================================================= */
 
-async function getSignedURL(path){
+async function signedURL(
+    path
+){
 
     const result =
         await supabaseClient
@@ -2034,35 +3043,65 @@ async function getSignedURL(path){
             3600
         );
 
+
     if(result.error){
 
-        console.error(result.error);
+        console.error(
+            "URL ERROR:",
+            result.error
+        );
 
         return null;
+
     }
 
+
     return result.data.signedUrl;
+
 }
 
 
-/* ============================================================
-   PHOTOS
-============================================================ */
+/* =========================================================
+   PHOTOS REFRESH
+========================================================= */
 
 async function refreshPhotos(){
 
+    if(!currentUser){
+
+        return;
+
+    }
+
+
     const files =
-        await listFolder(PHOTO_FOLDER);
+        await listFolder(
+            "photos"
+        );
+
+
+    document.getElementById(
+        "photoCount"
+    ).textContent =
+        files.length +
+        " photos";
+
 
     const gallery =
-        document.getElementById("photoGallery");
+        document.getElementById(
+            "photoGallery"
+        );
+
 
     const homeGallery =
-        document.getElementById("homeGallery");
+        document.getElementById(
+            "homeGallery"
+        );
 
-    document.getElementById("photoCount")
-        .textContent =
-        files.length + " photos";
+
+    gallery.innerHTML="";
+
+    homeGallery.innerHTML="";
 
 
     if(!files.length){
@@ -2070,98 +3109,140 @@ async function refreshPhotos(){
         gallery.innerHTML =
             `<div class="empty">
                 📸<br><br>
-                Your private gallery is empty.
+                No photos yet.
             </div>`;
 
         homeGallery.innerHTML =
             `<div class="empty">
-                No photos uploaded yet.
+                No photos yet.
             </div>`;
 
         return;
+
     }
 
 
-    gallery.innerHTML="";
-    homeGallery.innerHTML="";
+    let homeCount=0;
 
 
-    for(const file of files){
+    for(
+        const file of files
+    ){
 
         const path =
             currentUser.id +
-            "/" +
-            PHOTO_FOLDER +
-            "/" +
+            "/photos/" +
             file.name;
 
+
         const url =
-            await getSignedURL(path);
+            await signedURL(
+                path
+            );
+
 
         if(!url){
             continue;
         }
 
 
-        const item =
-            document.createElement("div");
+        const photo =
+            document.createElement(
+                "div"
+            );
 
-        item.className="photo";
+        photo.className="photo";
 
-        item.innerHTML =
-            `<img
-                src="${url}"
-                loading="lazy"
-                alt=""
-            >`;
 
-        item.onclick=()=>{
+        const img =
+            document.createElement(
+                "img"
+            );
+
+        img.src=url;
+
+        img.loading="lazy";
+
+
+        photo.appendChild(img);
+
+
+        photo.onclick=()=>{
+
             openPhoto(
                 url,
                 file.name
             );
+
         };
 
-        gallery.appendChild(item);
+
+        gallery.appendChild(
+            photo
+        );
 
 
-        if(
-            homeGallery.children.length < 8
-        ){
+        if(homeCount<8){
 
-            const homeItem =
-                item.cloneNode(true);
+            const clone =
+                photo.cloneNode(
+                    true
+                );
 
-            homeItem.onclick=()=>{
+
+            clone.onclick=()=>{
+
                 openPhoto(
                     url,
                     file.name
                 );
+
             };
 
+
             homeGallery.appendChild(
-                homeItem
+                clone
             );
+
+
+            homeCount++;
+
         }
+
     }
+
 }
 
 
-/* ============================================================
-   PDF LIST
-============================================================ */
+/* =========================================================
+   PDF REFRESH
+========================================================= */
 
 async function refreshPDFs(){
 
+    if(!currentUser){
+        return;
+    }
+
+
     const files =
-        await listFolder(PDF_FOLDER);
+        await listFolder(
+            "pdfs"
+        );
+
+
+    document.getElementById(
+        "pdfCount"
+    ).textContent =
+        files.length +
+        " PDFs";
+
 
     const list =
-        document.getElementById("pdfList");
+        document.getElementById(
+            "pdfList"
+        );
 
-    document.getElementById("pdfCount")
-        .textContent =
-        files.length + " PDFs";
 
     list.innerHTML="";
 
@@ -2171,33 +3252,43 @@ async function refreshPDFs(){
         list.innerHTML =
             `<div class="empty">
                 📄<br><br>
-                No PDF documents yet.
+                No PDFs yet.
             </div>`;
 
         return;
+
     }
 
 
-    for(const file of files){
+    for(
+        const file of files
+    ){
 
         const path =
             currentUser.id +
-            "/" +
-            PDF_FOLDER +
-            "/" +
+            "/pdfs/" +
             file.name;
 
+
         const url =
-            await getSignedURL(path);
+            await signedURL(
+                path
+            );
+
 
         const row =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
-        row.className="file";
+        row.className="fileRow";
+
 
         row.innerHTML =
             `
-            <div class="fileIcon">PDF</div>
+            <div class="fileIcon">
+                PDF
+            </div>
 
             <div class="fileInfo">
 
@@ -2206,53 +3297,73 @@ async function refreshPDFs(){
                 </div>
 
                 <div class="fileMeta">
-                    Private cloud PDF
+                    Private document
                 </div>
 
             </div>
 
-            <button class="fileAction">
+            <button
+                class="fileAction">
                 Open
             </button>
 
-            <button class="fileAction">
+            <button
+                class="fileAction">
                 Delete
             </button>
             `;
 
 
         row.children[2].onclick=()=>{
+
             openPDF(
                 url,
                 file.name
             );
+
         };
 
 
         row.children[3].onclick=()=>{
-            deleteObject(
-                path,
-                "PDF deleted"
+
+            deleteFile(
+                path
             );
+
         };
 
 
-        list.appendChild(row);
+        list.appendChild(
+            row
+        );
+
     }
+
 }
 
 
-/* ============================================================
-   GENERAL FILE LIST
-============================================================ */
+/* =========================================================
+   FILE REFRESH
+========================================================= */
 
 async function refreshFiles(){
 
+    if(!currentUser){
+        return;
+    }
+
+
     const files =
-        await listFolder(FILE_FOLDER);
+        await listFolder(
+            "files"
+        );
+
 
     const list =
-        document.getElementById("fileList");
+        document.getElementById(
+            "fileList"
+        );
+
 
     list.innerHTML="";
 
@@ -2266,29 +3377,39 @@ async function refreshFiles(){
             </div>`;
 
         return;
+
     }
 
 
-    for(const file of files){
+    for(
+        const file of files
+    ){
 
         const path =
             currentUser.id +
-            "/" +
-            FILE_FOLDER +
-            "/" +
+            "/files/" +
             file.name;
 
+
         const url =
-            await getSignedURL(path);
+            await signedURL(
+                path
+            );
+
 
         const row =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
-        row.className="file";
+        row.className="fileRow";
+
 
         row.innerHTML =
             `
-            <div class="fileIcon">FILE</div>
+            <div class="fileIcon">
+                FILE
+            </div>
 
             <div class="fileInfo">
 
@@ -2303,139 +3424,191 @@ async function refreshFiles(){
             </div>
 
             <a
-              class="fileAction"
-              href="${url}"
-              target="_blank"
-            >
-              Open
+                class="fileAction"
+                href="${url}"
+                target="_blank">
+                Open
             </a>
 
-            <button class="fileAction">
+            <button
+                class="fileAction">
                 Delete
             </button>
             `;
 
 
         row.children[3].onclick=()=>{
-            deleteObject(
-                path,
-                "File deleted"
+
+            deleteFile(
+                path
             );
+
         };
 
 
-        list.appendChild(row);
+        list.appendChild(
+            row
+        );
+
     }
+
 }
 
 
-/* ============================================================
+/* =========================================================
    DELETE
-============================================================ */
+========================================================= */
 
-async function deleteObject(path,message){
+async function deleteFile(
+    path
+){
 
     if(
         !confirm(
-            "Delete this item permanently?"
+            "Delete this item?"
         )
     ){
         return;
     }
 
+
     const result =
         await supabaseClient
         .storage
         .from("vault")
-        .remove([path]);
+        .remove([
+            path
+        ]);
+
 
     if(result.error){
 
-        console.error(result.error);
-
-        toast("Delete failed");
+        showToast(
+            "Delete failed"
+        );
 
         return;
+
     }
 
-    toast(message);
 
-    await refreshAll();
+    showToast(
+        "Deleted"
+    );
+
+
+    await refreshVault();
+
 }
 
 
-/* ============================================================
-   STORAGE INFORMATION
-============================================================ */
+/* =========================================================
+   STORAGE
+========================================================= */
 
-async function updateStorageInfo(){
+async function updateStorage(){
 
-    const photoFiles =
-        await listFolder(PHOTO_FOLDER);
+    if(!currentUser){
+        return;
+    }
 
-    const pdfFiles =
-        await listFolder(PDF_FOLDER);
 
-    const otherFiles =
-        await listFolder(FILE_FOLDER);
+    const folders=[
+        "photos",
+        "pdfs",
+        "files"
+    ];
 
-    let totalBytes = 0;
 
-    [
-        ...photoFiles,
-        ...pdfFiles,
-        ...otherFiles
-    ].forEach(file=>{
+    let bytes=0;
 
-        totalBytes +=
-            Number(
-                file.metadata?.size || 0
+
+    for(
+        const folder of folders
+    ){
+
+        const files =
+            await listFolder(
+                folder
             );
-    });
+
+
+        files.forEach(
+            file=>{
+
+                bytes += Number(
+                    file.metadata?.size || 0
+                );
+
+            }
+        );
+
+    }
 
 
     const mb =
-        totalBytes /
+        bytes /
         (1024*1024);
 
-    const text =
-        mb.toFixed(1) +
-        " MB used";
 
     document.getElementById(
         "storageText"
     ).textContent =
-        text;
+        mb.toFixed(1) +
+        " MB used";
+
 
     document.getElementById(
         "settingsStorage"
     ).textContent =
-        text;
+        mb.toFixed(1) +
+        " MB";
+
 
     /*
-       UI limit shown as 1 GB.
-       Change this number if your actual
-       storage plan is different.
+      UI reference:
+      1 GB = 1024 MB.
+
+      This is only a display calculation.
+      Actual storage depends on your Supabase plan.
     */
 
     const percent =
         Math.min(
-            (mb / 1024) * 100,
+            (mb/1024)*100,
             100
         );
+
 
     document.getElementById(
         "storageFill"
     ).style.width =
-        percent + "%";
+        percent +
+        "%";
+
 }
 
 
-/* ============================================================
-   REFRESH EVERYTHING
-============================================================ */
+/* =========================================================
+   REFRESH VAULT
+========================================================= */
 
-async function refreshAll(){
+async function refreshVault(){
+
+    if(!currentUser){
+
+        const connected =
+            await ensureCloudSession();
+
+
+        if(!connected){
+
+            return;
+
+        }
+
+    }
+
 
     await refreshPhotos();
 
@@ -2443,97 +3616,134 @@ async function refreshAll(){
 
     await refreshFiles();
 
-    await updateStorageInfo();
+    await updateStorage();
+
 }
 
 
-/* ============================================================
-   PHOTO VIEWER
-============================================================ */
+/* =========================================================
+   VIEW PHOTO
+========================================================= */
 
-function openPhoto(url,name){
+function openPhoto(
+    url,
+    name
+){
 
     document.getElementById(
         "photoViewerImage"
     ).src=url;
 
+
     document.getElementById(
         "photoViewerName"
     ).textContent=name;
 
+
     document
-        .getElementById("photoModal")
-        .classList.add("show");
+        .getElementById(
+            "photoModal"
+        )
+        .classList.add(
+            "show"
+        );
+
 }
 
 
-/* ============================================================
-   PDF VIEWER
-============================================================ */
+/* =========================================================
+   VIEW PDF
+========================================================= */
 
-function openPDF(url,name){
+function openPDF(
+    url,
+    name
+){
 
     document.getElementById(
         "pdfViewerName"
     ).textContent=name;
 
+
     document.getElementById(
         "pdfFrame"
     ).src=url;
 
+
     document
-        .getElementById("pdfModal")
-        .classList.add("show");
+        .getElementById(
+            "pdfModal"
+        )
+        .classList.add(
+            "show"
+        );
+
 }
 
 
-/* ============================================================
+/* =========================================================
    CLOSE MODAL
-============================================================ */
+========================================================= */
 
 function closeModal(id){
 
     document
         .getElementById(id)
-        .classList.remove("show");
+        .classList.remove(
+            "show"
+        );
+
 }
 
 
-/* ============================================================
+/* =========================================================
    SETTINGS
-============================================================ */
+========================================================= */
 
 function openSettings(){
 
     document
-        .getElementById("settingsModal")
-        .classList.add("show");
+        .getElementById(
+            "settingsModal"
+        )
+        .classList.add(
+            "show"
+        );
+
 }
 
 
 function toggleSwitch(button){
 
-    button.classList.toggle("on");
+    button.classList.toggle(
+        "on"
+    );
+
 }
 
 
-/* ============================================================
+/* =========================================================
    NAVIGATION
-============================================================ */
+========================================================= */
 
 function hidePages(){
 
-    document.getElementById("homePage")
-        .style.display="none";
+    document.getElementById(
+        "homePage"
+    ).style.display="none";
 
-    document.getElementById("photosPage")
-        .style.display="none";
+    document.getElementById(
+        "photosPage"
+    ).style.display="none";
 
-    document.getElementById("filesPage")
-        .style.display="none";
+    document.getElementById(
+        "filesPage"
+    ).style.display="none";
 
-    document.getElementById("pdfPage")
-        .style.display="none";
+    document.getElementById(
+        "pdfPage"
+    ).style.display="none";
+
 }
 
 
@@ -2541,15 +3751,15 @@ function showHome(){
 
     hidePages();
 
-    document.getElementById("homePage")
-        .style.display="block";
+    document.getElementById(
+        "homePage"
+    ).style.display="block";
 
-    document.getElementById("pageTitle")
-        .textContent="Welcome back, Harsha";
+    document.getElementById(
+        "pageTitle"
+    ).textContent=
+        "Welcome back";
 
-    document.getElementById("pageSubtitle")
-        .textContent=
-        "Your private cloud space.";
 }
 
 
@@ -2557,17 +3767,17 @@ function showPhotos(){
 
     hidePages();
 
-    document.getElementById("photosPage")
-        .style.display="block";
+    document.getElementById(
+        "photosPage"
+    ).style.display="block";
 
-    document.getElementById("pageTitle")
-        .textContent="Photos";
-
-    document.getElementById("pageSubtitle")
-        .textContent=
-        "Your private mobile-style gallery.";
+    document.getElementById(
+        "pageTitle"
+    ).textContent=
+        "Photos";
 
     refreshPhotos();
+
 }
 
 
@@ -2575,17 +3785,17 @@ function showFiles(){
 
     hidePages();
 
-    document.getElementById("filesPage")
-        .style.display="block";
+    document.getElementById(
+        "filesPage"
+    ).style.display="block";
 
-    document.getElementById("pageTitle")
-        .textContent="Files";
-
-    document.getElementById("pageSubtitle")
-        .textContent=
-        "Your private cloud files.";
+    document.getElementById(
+        "pageTitle"
+    ).textContent=
+        "Files";
 
     refreshFiles();
+
 }
 
 
@@ -2593,69 +3803,107 @@ function showPDFs(){
 
     hidePages();
 
-    document.getElementById("pdfPage")
-        .style.display="block";
+    document.getElementById(
+        "pdfPage"
+    ).style.display="block";
 
-    document.getElementById("pageTitle")
-        .textContent="PDF Documents";
-
-    document.getElementById("pageSubtitle")
-        .textContent=
-        "Your private PDF library.";
+    document.getElementById(
+        "pageTitle"
+    ).textContent=
+        "PDFs";
 
     refreshPDFs();
+
 }
 
 
-function showPlaceholder(name){
+function showPlaceholder(
+    name
+){
 
     hidePages();
 
-    document.getElementById("pageTitle")
-        .textContent=name;
+    document.getElementById(
+        "pageTitle"
+    ).textContent=name;
 
-    document.getElementById("pageSubtitle")
-        .textContent=
-        "This section is ready for the next module.";
+    document.getElementById(
+        "pageSubtitle"
+    ).textContent=
+        "Private section";
 
-    toast(
-        name +
-        " module coming next"
-    );
 }
 
 
-/* ============================================================
-   LOCK
-============================================================ */
+/* =========================================================
+   LOCK VAULT
+========================================================= */
 
 function lockVault(){
 
-    document.getElementById("vault")
-        .style.display="none";
+    document.getElementById(
+        "vault"
+    ).style.display="none";
 
-    document.getElementById("lockScreen")
-        .style.display="flex";
 
     resetPuzzle();
 
-    toast("Vault locked");
+
+    /*
+      Return to the clean Chinese screen.
+    */
+
+    window.scrollTo(
+        0,
+        0
+    );
+
 }
 
 
-/* ============================================================
+/* =========================================================
    ESCAPE HTML
-============================================================ */
+========================================================= */
 
-function escapeHTML(text){
+function escapeHTML(
+    text
+){
 
     return String(text)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
 }
+
+
+/* =========================================================
+   START
+========================================================= */
+
+setupPuzzle();
 
 </script>
 
